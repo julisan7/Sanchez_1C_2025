@@ -41,7 +41,7 @@ struct leds //Estructura LED
     uint8_t mode;       //ON, OFF, TOGGLE
 	uint8_t n_led;      //indica el número de led a controlar
 	uint8_t n_ciclos;   //indica la cantidad de ciclos de ncendido/apagado
-	uint16_t periodo;   //indica el tiempo de cada ciclo
+	uint16_t periodo;   //indica el tiempo de cada ciclo el milisegundos
 } my_leds; 
 /*==================[internal data definition]===============================*/
 void quehacer(struct leds*leds) //Prende, apaga y togglea el led
@@ -80,18 +80,24 @@ void quehacer(struct leds*leds) //Prende, apaga y togglea el led
 	break;
 
 	case TOGGLE:
-	switch (leds->n_led)
-	{
-		case 1:
-			LedToggle(LED_1);
-		break;
-		case 2:
-			LedToggle(LED_2);
-		break;
-		case 3:
-			LedToggle(LED_3);
-		break;
-	}
+		for (int i = 0; i < (2*leds->n_ciclos); i++)
+		{
+			switch (leds->n_led){
+				case 1:
+					LedToggle(LED_1);
+
+				break;
+				case 2:
+					LedToggle(LED_2);
+
+				break;
+				case 3:
+					LedToggle(LED_3);
+
+				break;
+			}
+			vTaskDelay(leds->periodo / portTICK_PERIOD_MS);
+		}
 
 	break;
 	}
@@ -104,14 +110,20 @@ void app_main(void){
 
 LedsInit();
 
-struct leds ledcito1;
+struct leds ledcito1, ledcito2;
 
 ledcito1.mode=ON;
 ledcito1.n_led=1;
 ledcito1.n_ciclos=30;
 ledcito1.periodo=100;
 
+ledcito2.mode=TOGGLE;
+ledcito2.n_led=2;
+ledcito2.n_ciclos=5;
+ledcito2.periodo=500;
+
 quehacer(&ledcito1);
+quehacer(&ledcito2);
 
 
 }
