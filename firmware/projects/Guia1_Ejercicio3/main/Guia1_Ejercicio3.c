@@ -112,15 +112,16 @@ LedsInit();
 
 struct leds ledcito1, ledcito2;
 
-ledcito1.mode=ON;
+ledcito1.mode=OFF;
 ledcito1.n_led=1;
 ledcito1.n_ciclos=30;
 ledcito1.periodo=100;
 
 ledcito2.mode=TOGGLE;
 ledcito2.n_led=2;
-ledcito2.n_ciclos=5;
+ledcito2.n_ciclos=10;
 ledcito2.periodo=500;
+
 
 quehacer(&ledcito1);
 quehacer(&ledcito2);
