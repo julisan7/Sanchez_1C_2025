@@ -1,8 +1,9 @@
-/*! @mainpage Template
+/*! @mainpage Guia 1
  *
- * @section genDesc General Description
+ * @section Ejercicio 2 de la guia 1
  *
- * This section describes how the program works.
+ * Este programa hace titilar los leds 1 y 2 al mantener presionada las teclas 1 y 2 correspondientemente.
+ * También se puedde hacer titilar el led 3 al presionar simultáneamente las teclas 1 y 2.
  *
  * <a href="https://drive.google.com/...">Operation Example</a>
  *
@@ -19,7 +20,7 @@
  * |:----------:|:-----------------------------------------------|
  * | 12/09/2023 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
  */
 

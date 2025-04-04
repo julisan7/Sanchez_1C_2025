@@ -1,8 +1,8 @@
-/*! @mainpage Template
+/*! @mainpage Guia 1
  *
- * @section genDesc General Description
+ * @section Ejercicio 3 de la guia 1
  *
- * This section describes how the program works.
+ * Una función recibe un puntero a una estructura LED e indica que hacer con el led (prender, apagar, togglear)
  *
  * <a href="https://drive.google.com/...">Operation Example</a>
  *
@@ -19,7 +19,7 @@
  * |:----------:|:-----------------------------------------------|
  * | 12/09/2023 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
  */
 

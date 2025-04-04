@@ -1,8 +1,9 @@
-/*! @mainpage Template
+/*! @mainpage Guia 1
  *
- * @section genDesc General Description
+ * @section Ejercicio 5 de la guia 1
  *
- * This section describes how the program works.
+ * Una función recibe como parámetro un dígito BCD y un vector de estructuras del tipo gpioConf_t.
+ * La función cambia el estado de cada GPIO, a ‘0’ o a ‘1’, según el estado del bit correspondiente en el BCD ingresado.
  *
  * <a href="https://drive.google.com/...">Operation Example</a>
  *

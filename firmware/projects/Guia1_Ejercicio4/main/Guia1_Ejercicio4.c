@@ -1,8 +1,11 @@
-/*! @mainpage Template
+/*! @mainpage Guia 1
  *
- * @section genDesc General Description
+ * @section Ejercicio 4 de la guia 1
  *
- * This section describes how the program works.
+ * Una función recibe un dato de 32 bits, la cantidad de dígitos de salida
+ * y un puntero a un arreglo donde se almacene los n dígitos.
+ * La función convierte el dato recibido a BCD y
+ * guarda cada uno de los dígitos de salida en el arreglo pasado como puntero.
  *
  * <a href="https://drive.google.com/...">Operation Example</a>
  *

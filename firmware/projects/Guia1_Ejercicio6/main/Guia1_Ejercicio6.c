@@ -1,8 +1,12 @@
-/*! @mainpage Template
+/*! @mainpage Guia 1
  *
- * @section genDesc General Description
+ * @section Ejercicio 6 de la guia 1
  *
- * This section describes how the program works.
+ * Una función recibe un dato de 32 bits, la cantidad de dígitos de salida y dos vectores de estructuras del tipo  gpioConf_t.
+ * Uno  de estos vectores es igual al definido en el punto anterior
+ * y el otro vector mapea los puertos con el dígito del LCD a donde mostrar un dato. 
+ * La función muestra por display el valor que recibe.
+ * Se reutilizan las funciones creadas en el punto 4 y 5.
  *
  * <a href="https://drive.google.com/...">Operation Example</a>
  *
@@ -17,9 +21,9 @@
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 28/03/2025 | Document creation		                         |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
  */
 
