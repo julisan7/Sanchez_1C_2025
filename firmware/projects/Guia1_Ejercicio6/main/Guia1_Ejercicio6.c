@@ -14,14 +14,24 @@
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	D1	      	| 	GPIO_20		|
+ * | 	D2	 	    | 	GPIO_21		|
+ * | 	D3	 	    | 	GPIO_22		|
+ * | 	D4	 	    | 	GPIO_23		|
+ * | 	SEL_1	 	| 	GPIO_19		|
+ * | 	SEL_2	 	| 	GPIO_18		|
+ * | 	SEL_3	 	| 	GPIO_9		|
+ * | 	+5V	     	| 	+5V		    |
+ * | 	GND	    	| 	GND		    |
  *
  *
  * @section changelog Changelog
  *
- * |   Date	    | Description                                    |
- * |:----------:|:-----------------------------------------------|
- * | 28/03/2025 | Document creation		                         |
+ * |   Date	    | Description                                               |
+ * |:----------:|:----------------------------------------------------------|
+ * | 28/03/2025 | Document creation		                                    |
+ * | 28/03/2025 | Creacion del codigo basado en los ejercicios anteriores	|
+ * | 11/04/2025 | Creacion de la documentacion                           	|
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -39,6 +49,9 @@ typedef struct // esto queda asi no toco nada
 	io_t dir;	/*!< GPIO direction '0' IN;  '1' OUT*/
 } gpioConf_t;
 /*==================[internal functions declaration]=========================*/
+/**
+ * @brief Convierte un numero a un arreglo BCD.
+ */
 int8_t convertToBcdArray(uint32_t data, uint8_t digits, uint8_t *bcd_number) // del ejercicio 4
 {
 	for (int i = 0; i < digits; i++)
@@ -49,7 +62,9 @@ int8_t convertToBcdArray(uint32_t data, uint8_t digits, uint8_t *bcd_number) // 
 
 	return 0;
 }
-
+/** 
+ * @brief Cambia el estado del GPIO segun el bit correspondiente en el BCD ingresado.
+ */
 int8_t cambiarEstadoGPIO(uint8_t digitobcd, gpioConf_t *vectorgpio)
 { // del ejercicio 5
 	for (int i = 0; i < 4;)

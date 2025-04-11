@@ -44,7 +44,11 @@ struct leds //Estructura LED
 	uint16_t periodo;   //indica el tiempo de cada ciclo el milisegundos
 } my_leds; 
 /*==================[internal data definition]===============================*/
-void quehacer(struct leds*leds) //Prende, apaga y togglea el led
+/**
+ * @brief Prende, apaga o togglea el led segun el modo seleccionado
+ * @param leds puntero a la estructura leds
+ */
+void quehacer(struct leds*leds)
 { 
 	switch (leds->mode)
 	{

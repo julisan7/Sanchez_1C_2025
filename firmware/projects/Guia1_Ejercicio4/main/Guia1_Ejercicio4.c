@@ -20,7 +20,10 @@
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 28/03/2025 | Document creation		                         |
+ * | 28/03/2025 | Creacion de las funciones e implementacion     |
+ * |            | del codigo                                     |
+ * | 11/04/2025 | Creacion de la documentacion                   |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *

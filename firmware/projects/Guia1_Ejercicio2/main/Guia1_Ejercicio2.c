@@ -3,7 +3,7 @@
  * @section Ejercicio 2 de la guia 1
  *
  * Este programa hace titilar los leds 1 y 2 al mantener presionada las teclas 1 y 2 correspondientemente.
- * También se puedde hacer titilar el led 3 al presionar simultáneamente las teclas 1 y 2.
+ * También se puede hacer titilar el led 3 al presionar simultáneamente las teclas 1 y 2.
  *
  * <a href="https://drive.google.com/...">Operation Example</a>
  *

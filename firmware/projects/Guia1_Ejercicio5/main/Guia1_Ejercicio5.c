@@ -11,14 +11,19 @@
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 	PIN_X	 	| 	GPIO_20		|
+ * | 	PIN_X	 	| 	GPIO_21		|
+ * | 	PIN_X	 	| 	GPIO_22		|
+ * | 	PIN_X	 	| 	GPIO_23		|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 28/03/2025 | Document creation		                         |
+ * | 28/03/2025 | Creacion de las funciones                      |
+ * | 11/04/2025 | Documentacion del programa                     |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -37,6 +42,9 @@ typedef struct //esto queda asi no toco nada
 	io_t dir;			/*!< GPIO direction '0' IN;  '1' OUT*/
 } gpioConf_t;
 
+/**
+ * @brief Cambia el estado del GPIO segun el bit correspondiente en el BCD ingresado.
+ */
 int8_t cambiarEstadoGPIO(uint8_t digitobcd,gpioConf_t *vectorgpio){ //el digitobcd es de 4 bits
 	for(int i=0;i<4;){
 		if(digitobcd & (1<<i)){ //verdadero si el bit i es 1
