@@ -33,12 +33,8 @@
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 25/04/2025 | Creacion del documento					     |
- * | 25/04/2025 | Lo hice a partir del Ejercicio 1, solo cambie  | 
- * |            | la tarea de los switches por interrupciones    |
- * |            | Anda mucho mejor ahora                         |
- * | 09/05/2025 | Pongo timer para borrar los delays	         |
- * |            | Proyecto finalizado                            |
+ * | 09/05/2025 | Creacion del documento		                 |
+ * |            | Funciona el uart                               |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -56,54 +52,67 @@
 #include "switch.h"
 #include "lcditse0803.h"
 #include "timer_mcu.h"
+#include "uart_mcu.h"
 
 /*==================[macros and definitions]=================================*/
-#define CONFIG_TAREAS_PERIOD 1000*1000 // Periodo de las tareas en milisegundos porque el timer esta en microsegundos
+#define CONFIG_TAREAS_PERIOD 1000 * 1000 // Periodo de las tareas en milisegundos porque el timer esta en microsegundos
 
 bool conmutar_medicion = true; // Variable para controlar la medicion
 bool guardar_medicion = false; // Variable para guardar la medicion
-uint16_t medicion; // Variable para almacenar la medicion
-uint16_t medicion_anterior; // Variable para almacenar la medicion anterior
+uint16_t medicion;			   // Variable para almacenar la medicion
+uint16_t medicion_anterior;	   // Variable para almacenar la medicion anterior
 
 /*==================[internal data definition]===============================*/
 TaskHandle_t medir_task_handle = NULL;
 TaskHandle_t mostrar_task_handle = NULL;
-
+TaskHandle_t uart_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
 /**
  * @brief Función invocada en la interrupción del timer tareas
  */
-void FuncTimerTareas(void* param){
-    vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a medir*/
-	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a mostrar */
+void FuncTimerTareas(void *param)
+{
+	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);	  /* Envía una notificación a la tarea asociada a medir*/
+	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE); /* Envía una notificación a la tarea asociada a mostrar */
+	vTaskNotifyGiveFromISR(uart_task_handle, pdFALSE);
 }
 /*
  * @brief Función invocada para medir la distancia y prender o apagar los leds si es necesario
  */
-static void TareaMedir (void *pvParameter){
-	while(true){
+static void TareaMedir(void *pvParameter)
+{
+	while (true)
+	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		if (conmutar_medicion){
-			medicion=HcSr04ReadDistanceInCentimeters(); // Lee la distancia en cm
-			if(medicion<10){ /*se apagan todos los leds*/
+		if (conmutar_medicion)
+		{
+			medicion = HcSr04ReadDistanceInCentimeters(); // Lee la distancia en cm
+
+			if (medicion < 10)
+			{ /*se apagan todos los leds*/
 				LedOff(LED_1);
 				LedOff(LED_2);
 				LedOff(LED_3);
 			}
-			else{
-				if(medicion<20){ /*se enciende el led 1*/
+			else
+			{
+				if (medicion < 20)
+				{ /*se enciende el led 1*/
 					LedOn(LED_1);
 					LedOff(LED_2);
 					LedOff(LED_3);
 				}
-				else{
-					if(medicion<30){ /*se enciende el led 1 y 2*/
+				else
+				{
+					if (medicion < 30)
+					{ /*se enciende el led 1 y 2*/
 						LedOn(LED_1);
 						LedOn(LED_2);
 						LedOff(LED_3);
 					}
-					else{ /*se encienden todos los leds*/
+					else
+					{ /*se encienden todos los leds*/
 						LedOn(LED_1);
 						LedOn(LED_2);
 						LedOn(LED_3);
@@ -117,54 +126,76 @@ static void TareaMedir (void *pvParameter){
 /*
  * @brief Funcion invocada para activar o prender la medicion
  */
-void Switch1OnOfMedicion(){
+void Switch1OnOfMedicion()
+{
 	conmutar_medicion = !conmutar_medicion; // Cambia el estado de la variable de medicion
 }
 
 /*
  * @brief Funcion invocada para mantener en el display el valor de la medicion
  */
-void Switch2HoldMedicion(){
+void Switch2HoldMedicion()
+{
 	guardar_medicion = !guardar_medicion; // Cambia el estado de la variable de guardar medicion
-	medicion_anterior = medicion; // Guarda la medicion actual
+	medicion_anterior = medicion;		  // Guarda la medicion actual
 }
 /*
  * @brief Funcion invocada para mostrar la medicion en el display
  */
-static void TareaMostrar (void *pvParameter){
-	while(true){
+static void TareaMostrar(void *pvParameter)
+{
+	while (true)
+	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		if(!guardar_medicion){ // si guardar medicion es negativo muestra la medicion actual
+		if (!guardar_medicion)
+		{								// si guardar medicion es negativo muestra la medicion actual
 			LcdItsE0803Write(medicion); // Muestra la medicion en el display
 		}
-		else{
+		else
+		{
 			LcdItsE0803Write(medicion_anterior); // si guardar medicion es postivio muestra la medicion anterior
 		}
-		//vTaskDelay(delay_tareas / portTICK_PERIOD_MS);
+		// vTaskDelay(delay_tareas / portTICK_PERIOD_MS);
 	}
 }
 
+void UartTask(void *param)
+{ // Declaracion de la tarea de UART
+	while (true)
+	{
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // La tarea espera en este punto hasta recibir una notificación
+		UartSendString(UART_PC, "Medicion:\n"); // Envia la medicion por UART
+	}
+}
 
 /*==================[external functions definition]==========================*/
-void app_main(void){
+void app_main(void)
+{
 	timer_config_t timer_tareas = {
-        .timer = TIMER_A,
-        .period = CONFIG_TAREAS_PERIOD,
-        .func_p = FuncTimerTareas,
-        .param_p = NULL
-    };
+		.timer = TIMER_A,
+		.period = CONFIG_TAREAS_PERIOD,
+		.func_p = FuncTimerTareas,
+		.param_p = NULL};
 
-	LedsInit(); // Inicializa los leds
-	HcSr04Init(GPIO_3,GPIO_2); // Inicializa el HC_SR04
-	SwitchesInit(); // Inicializa los switches
-	LcdItsE0803Init(); // Inicializa el display LCD
-	TimerInit(&timer_tareas); // Inicializa el timer
-	
-	SwitchActivInt(SWITCH_1,&Switch1OnOfMedicion, NULL); // Activa la interrupcion del switch 1
-	SwitchActivInt(SWITCH_2,&Switch2HoldMedicion, NULL); // Activa la interrupcion del switch 2
+	serial_config_t my_uart = {
+		.port = UART_PC,
+		.baud_rate = 9600,
+		.func_p = NULL,
+		.param_p = NULL};
+
+	LedsInit();					// Inicializa los leds
+	HcSr04Init(GPIO_3, GPIO_2); // Inicializa el HC_SR04
+	SwitchesInit();				// Inicializa los switches
+	LcdItsE0803Init();			// Inicializa el display LCD
+	TimerInit(&timer_tareas);	// Inicializa el timer
+	UartInit(&my_uart);			// Inicializa el UART
+
+	SwitchActivInt(SWITCH_1, &Switch1OnOfMedicion, NULL); // Activa la interrupcion del switch 1
+	SwitchActivInt(SWITCH_2, &Switch2HoldMedicion, NULL); // Activa la interrupcion del switch 2
 
 	xTaskCreate(&TareaMedir, "Medir", 512, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaMostrar, "Mostrar", 512, NULL, 5, &mostrar_task_handle); // Crea la tarea para mostrar la medicion en el display
+	xTaskCreate(&UartTask, "Uart", 512, NULL, 5, &uart_task_handle);	   // Crea la tarea para enviar la medicion por UART
 
 	TimerStart(timer_tareas.timer); // Inicializa el conteo del timer tareas
 }
