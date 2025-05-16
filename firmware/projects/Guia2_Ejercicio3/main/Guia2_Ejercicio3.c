@@ -1,12 +1,14 @@
 /*! @mainpage Guia 2
  *
- * @section Ejercicio 2 de la guia 2
+ * @section Ejercicio 3 de la guia 2
  *
- * Mide la distancia, prende los leds en funcion de la distancia, muestra el valor de la distancia en el display LCD
- * y usa los botones TEC1 y TEC2 para activar o detener la medicion y mantener el resultado respectivamente. La medicion
- * se refresca cada 1 segundo
+ * Cree un nuevo proyecto en el que modifique la actividad del punto 2 agregando ahora el puerto serie.
+ * Envíe los datos de las mediciones para poder observarlos en un terminal en la PC, siguiendo el siguiente formato:
+ * 3 dígitos ascii + 1 carácter espacio + dos caracteres para la unidad (cm) + cambio de línea “ \r\n”
+ * Además debe ser posible controlar la EDU-ESP de la siguiente manera:
+ * Con las teclas “O” y “H”, replicar la funcionalidad de las teclas 1 y 2 de la EDU-ESP.
  *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ *
  *
  * @section hardConn Hardware Connection
  *
@@ -34,8 +36,10 @@
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
  * | 09/05/2025 | Creacion del documento		                 |
- * |            | Funciona el uart                               |
- *
+ * |            | Funciona el uart 								 |
+ * |            |(informa por monitor la medicion)               |
+ * | 16/05/2025 |Se agregaron las funcionalidades de O y H       |
+ * 
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
  */
@@ -53,6 +57,7 @@
 #include "lcditse0803.h"
 #include "timer_mcu.h"
 #include "uart_mcu.h"
+#include "ctype.h"
 
 /*==================[macros and definitions]=================================*/
 #define CONFIG_TAREAS_PERIOD 1000 * 1000 // Periodo de las tareas en milisegundos porque el timer esta en microsegundos
@@ -68,7 +73,7 @@ TaskHandle_t mostrar_task_handle = NULL;
 TaskHandle_t uart_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
-/**
+/*
  * @brief Función invocada en la interrupción del timer tareas
  */
 void FuncTimerTareas(void *param)
@@ -147,24 +152,50 @@ static void TareaMostrar(void *pvParameter)
 	while (true)
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		if (!guardar_medicion)
-		{								// si guardar medicion es negativo muestra la medicion actual
-			LcdItsE0803Write(medicion); // Muestra la medicion en el display
-		}
-		else
+		if (conmutar_medicion)
 		{
-			LcdItsE0803Write(medicion_anterior); // si guardar medicion es postivio muestra la medicion anterior
+			if (!guardar_medicion)
+			{								// si guardar medicion es negativo muestra la medicion actual
+				LcdItsE0803Write(medicion); // Muestra la medicion en el display
+			}
+			else
+			{
+				LcdItsE0803Write(medicion_anterior); // si guardar medicion es postivio muestra la medicion anterior
+			}
 		}
-		// vTaskDelay(delay_tareas / portTICK_PERIOD_MS);
+		else //Si se apreta la O, se apaga la pantalla
+		{
+			LcdItsE0803Off();
+		}
 	}
 }
 
-void UartTask(void *param)
-{ // Declaracion de la tarea de UART
+void UartTask(void *param)// Declaracion de la tarea de UART
+{ 
 	while (true)
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // La tarea espera en este punto hasta recibir una notificación
-		UartSendString(UART_PC, "Medicion:\n"); // Envia la medicion por UART
+		UartSendString(UART_PC, "Se midieron: ");
+		UartSendString(UART_PC, (char *)UartItoa(medicion, 10));
+		UartSendString(UART_PC, " cm \r\n");
+	}
+}
+
+/*
+ * @brief Lee la entrada del usuario por el puerto serie y activa o mantiene la medicion
+ */
+void LeerEntrada()
+{
+	uint8_t letra;
+	UartReadByte(UART_PC, &letra); // Lee la letra ingresada por el usuario
+	if (letra == 'O')
+	{
+		Switch1OnOfMedicion(); //prende o apaga el lcd
+	}
+	if (letra == 'H')
+	{
+		Switch2HoldMedicion(); // Mantiene la medicion
+		UartSendString (UART_PC, "Se debe volver a ingresar H para continuar midiendo");
 	}
 }
 
@@ -180,7 +211,7 @@ void app_main(void)
 	serial_config_t my_uart = {
 		.port = UART_PC,
 		.baud_rate = 9600,
-		.func_p = NULL,
+		.func_p = LeerEntrada, // funcion que lee las teclas (O,H)
 		.param_p = NULL};
 
 	LedsInit();					// Inicializa los leds
@@ -195,7 +226,7 @@ void app_main(void)
 
 	xTaskCreate(&TareaMedir, "Medir", 512, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaMostrar, "Mostrar", 512, NULL, 5, &mostrar_task_handle); // Crea la tarea para mostrar la medicion en el display
-	xTaskCreate(&UartTask, "Uart", 512, NULL, 5, &uart_task_handle);	   // Crea la tarea para enviar la medicion por UART
+	xTaskCreate(&UartTask, "Uart", 512, NULL, 5, &uart_task_handle);		   // Crea la tarea para enviar la medicion por UART
 
 	TimerStart(timer_tareas.timer); // Inicializa el conteo del timer tareas
 }
