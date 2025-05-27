@@ -20,6 +20,8 @@
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
  * | 23/05/2025 | Creacion del documento                         |
+ * | 27/05/2025 | Se definen datos internos y se esquematiza     |
+ * |            | la tarea medir                                 |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -31,9 +33,25 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
+bool ventanas_abiertas = false; //false si las ventanas estan cerradas, true si estan abiertas
+bool luces_prendidas = false; //false si estan apagadas, true si estan prendidas
+uint16_t medicion;			   // Variable para almacenar la medicion
+uint16_t iluminacion_ideal;	   // Valor optimo con el cual se compara la medicion
 
+TaskHandle_t medir_task_handle = NULL; //tarea que mide
 /*==================[internal functions declaration]=========================*/
-
+static void TareaMedir (void *pvParameter){
+	while(true){
+		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) /* La tarea espera en este punto hasta recibir una notificación */
+		//aca le asigno el valor a medicion
+		if(medicion<iluminacion_ideal){
+			//comparo afuera y adentro y veo si abro ventanas o prendo luces
+		}
+		if(medicion>=iluminacion_ideal){
+			//jaja q hago si ta todo ok?
+		}
+	}
+}
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	printf("Hello world!\n");
