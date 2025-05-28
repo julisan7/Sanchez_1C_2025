@@ -78,7 +78,7 @@ void FuncTimerTareas(void* param){
     vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a medir*/
 	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a mostrar */
 }
-/*
+/**
  * @brief Función invocada para medir la distancia y prender o apagar los leds si es necesario
  */
 static void TareaMedir (void *pvParameter){
@@ -114,21 +114,21 @@ static void TareaMedir (void *pvParameter){
 	}
 }
 
-/*
+/**
  * @brief Funcion invocada para activar o prender la medicion
  */
 void Switch1OnOfMedicion(){
 	conmutar_medicion = !conmutar_medicion; // Cambia el estado de la variable de medicion
 }
 
-/*
+/**
  * @brief Funcion invocada para mantener en el display el valor de la medicion
  */
 void Switch2HoldMedicion(){
 	guardar_medicion = !guardar_medicion; // Cambia el estado de la variable de guardar medicion
 	medicion_anterior = medicion; // Guarda la medicion actual
 }
-/*
+/**
  * @brief Funcion invocada para mostrar la medicion en el display
  */
 static void TareaMostrar (void *pvParameter){

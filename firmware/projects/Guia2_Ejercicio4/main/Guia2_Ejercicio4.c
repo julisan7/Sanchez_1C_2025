@@ -85,7 +85,7 @@ const char ecg[BUFFER_SIZE] = {
 
 } ;
 /*==================[internal functions declaration]=========================*/
-/*
+/**
 * @brief Funcion invocada para leer y enviar los datos
 */
 static void TareaLeerEnviar(void *pvParameter){ //convierte un dato de analogico a digital y depues envia el dato por la uart
@@ -98,7 +98,7 @@ static void TareaLeerEnviar(void *pvParameter){ //convierte un dato de analogico
 	}
 
 }
-/*
+/**
 * @brief Esta funcion pasa la señal del buffer a analogico
 */
 static void TareaGenerarECG(void *pvParameter){
@@ -112,7 +112,9 @@ static void TareaGenerarECG(void *pvParameter){
 		}
 	}
 }
-
+/**
+* @brief Funcion invocada para notificar las tareas
+*/
 void FuncTimerTareas(void *param){
 	vTaskNotifyGiveFromISR(LeerEnviar_task_handle, pdFALSE);	  /* Envía una notificación a la tarea asociada a Leer y medir*/
 	vTaskNotifyGiveFromISR(GenerarECG_task_handle, pdFALSE);

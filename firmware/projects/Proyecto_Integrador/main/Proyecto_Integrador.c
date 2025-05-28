@@ -22,6 +22,7 @@
  * | 23/05/2025 | Creacion del documento                         |
  * | 27/05/2025 | Se definen datos internos y se esquematiza     |
  * |            | la tarea medir                                 |
+ * | 28/05/2025 | Se esquematizan las tareas ventanas y luces    |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -39,21 +40,63 @@ uint16_t medicion;			   // Variable para almacenar la medicion
 uint16_t iluminacion_ideal;	   // Valor optimo con el cual se compara la medicion
 
 TaskHandle_t medir_task_handle = NULL; //tarea que mide
+TaskHandle_t ventanas_task_handle = NULL; //tarea que abre y cierra las ventanas
+TaskHandle_t luces_task_handle = NULL; //tarea que prende y apaga las luces
+
 /*==================[internal functions declaration]=========================*/
+/**
+ * @brief Funcion que mide el valor de la resistencia que sensa la luz
+ */
 static void TareaMedir (void *pvParameter){
 	while(true){
 		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) /* La tarea espera en este punto hasta recibir una notificación */
-		//aca le asigno el valor a medicion
+		//medicion=la entrada analogica || aca le asigno el valor a medicion
 		if(medicion<iluminacion_ideal){
 			//comparo afuera y adentro y veo si abro ventanas o prendo luces
 		}
 		if(medicion>=iluminacion_ideal){
-			//jaja q hago si ta todo ok?
+			//jaja q hago si ta todo ok? podria informar por pantalla el valor de la resistencia ?
+		}
+	}
+}
+/**
+ * @brief Funcion que se encarga de abrir y cerrar las ventanas 
+ */
+static void TareaVentanas (void *pvParameter){
+	while(true){
+		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
+		switch (ventanas_abiertas){ //no se si hacerlo con un sitch o con un if
+			case 0:
+			//abrir ventanas e informar
+			break;
+			case 1:
+			//cerrar ventanas e infromar
+			break;
+		}
+	}
+}
+/**
+ * @brief Funcion que se encarga de prender y apagar las luces
+ */
+static void TareaLuces (void *pvParameter){
+	while(true){
+		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
+			switch (luces_prendidas){ //no se si hacerlo con un sitch o con un if
+			case 0:
+			//prender luces e informar
+			break;
+			case 1:
+			//apagar luces e informar
+			break;
 		}
 	}
 }
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	printf("Hello world!\n");
+	/*si lo hago con una foto resistencia, el valor de resistecia sube en la oscuridad, por lo q disminuye la corriente
+	deberia conectarla a la entrada analogica de la placa y ahi varia la corriente, tengo alguna forma de variar el voltaje? 
+	deberia medir con una iluminacion q me guste y en base a eso hacer los calculos?
+	*/
 }
 /*==================[end of file]============================================*/
