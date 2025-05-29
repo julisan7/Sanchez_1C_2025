@@ -42,8 +42,37 @@ uint16_t iluminacion_ideal;	   // Valor optimo con el cual se compara la medicio
 TaskHandle_t medir_task_handle = NULL; //tarea que mide
 TaskHandle_t ventanas_task_handle = NULL; //tarea que abre y cierra las ventanas
 TaskHandle_t luces_task_handle = NULL; //tarea que prende y apaga las luces
+TaskHandle_t LeerEnviar_task_handle = NULL; //tarea que lee y envia datos de la uart ¿?
 
 /*==================[internal functions declaration]=========================*/
+
+//---------------------no se si deberia ir una de estas aca---------------------------
+/**
+ * @brief Función invocada en la interrupción del timer tareas
+*
+void FuncTimerTareas(void* param){
+    vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    // Envía una notificación a la tarea asociada a medir
+	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    // Envía una notificación a la tarea asociada a mostrar 
+}
+*/
+
+
+/**
+* @brief Funcion invocada para leer y enviar los datos
+*
+static void TareaLeerEnviar(void *pvParameter){ //convierte un dato de analogico a digital y depues envia el dato por la uart
+	while (true){
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+		AnalogInputReadSingle(CH1, &datosConvertidos); //ver en q formato entra la iluminacion para convertir el dato ¿?
+		UartSendString(UART_PC, ">Luz:");
+		UartSendString(UART_PC, (char *)UartItoa(datosConvertidos, 10));
+		UartSendString(UART_PC, "\r\n");
+	}
+
+}
+*/
+
+
 /**
  * @brief Funcion que mide el valor de la resistencia que sensa la luz
  */
@@ -91,6 +120,8 @@ static void TareaLuces (void *pvParameter){
 		}
 	}
 }
+
+
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	printf("Hello world!\n");
