@@ -102,7 +102,11 @@
             "soc_caps.h": "c",
             "mpu6050.h": "c",
             "i2c_mcu.h": "c",
-            "cstdlib": "c"
+            "cstdlib": "c",
+            "pwm_mcu.h": "c",
+            "cstdint": "c",
+            "servo_sg90.h": "c",
+            "stdio.h": "c"
         },
     },
     "tasks": {

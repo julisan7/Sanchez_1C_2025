@@ -10,9 +10,11 @@
  *
  * @section hardConn Hardware Connection
  *
- * |    Peripheral  |   ESP32   	|
- * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * |    Servo          |   ESP32   	|
+ * |:-----------------:|:-----------|
+ * | PWM (naranja)	   | 	CH0  	|
+ * | GND (marron)	   | 	GND 	|
+ * | VCC (rojo)	 	   | 	5 V 	|
  *
  *
  * @section changelog Changelog
@@ -23,6 +25,7 @@
  * | 27/05/2025 | Se definen datos internos y se esquematiza     |
  * |            | la tarea medir                                 |
  * | 28/05/2025 | Se esquematizan las tareas ventanas y luces    |
+ * | 30/05/2025 | Implementacion del motor servo, funciona       |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -31,31 +34,53 @@
 /*==================[inclusions]=============================================*/
 #include <stdio.h>
 #include <stdint.h>
+
+#include <stdbool.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include "gpio_mcu.h"	//de los gpio para el servo y otras cositas
+#include "servo_sg90.h" //driver del servo
+
+#include "timer_mcu.h" //despues lo tengo q borrar
+
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-bool ventanas_abiertas = false; //false si las ventanas estan cerradas, true si estan abiertas
-bool luces_prendidas = false; //false si estan apagadas, true si estan prendidas
-uint16_t medicion;			   // Variable para almacenar la medicion
-uint16_t iluminacion_ideal;	   // Valor optimo con el cual se compara la medicion
+bool ventanas_abiertas = 1;	  // false si las ventanas estan cerradas, true si estan abiertas
+bool luces_prendidas = 0; // false si estan apagadas, true si estan prendidas
+uint16_t medicion;			  // Variable para almacenar la medicion
+uint16_t iluminacion_ideal;	  // Valor optimo con el cual se compara la medicion
+uint8_t angulo_servo;		  // angulo que se mueve el servo
 
-TaskHandle_t medir_task_handle = NULL; //tarea que mide
-TaskHandle_t ventanas_task_handle = NULL; //tarea que abre y cierra las ventanas
-TaskHandle_t luces_task_handle = NULL; //tarea que prende y apaga las luces
-TaskHandle_t LeerEnviar_task_handle = NULL; //tarea que lee y envia datos de la uart ¿?
+/*----------ESTO ES PARA PRUEBAS Y DESPUES SE BORRA----------*/
+// #define CONFIG_TAREAS_PERIOD 1000*1000*60 // Periodo de las tareas en segundos porque el timer esta en microsegundos
+
+TaskHandle_t medir_task_handle = NULL;		// tarea que mide
+TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventanas
+TaskHandle_t luces_task_handle = NULL;		// tarea que prende y apaga las luces
+TaskHandle_t LeerEnviar_task_handle = NULL; // tarea que lee y envia datos de la uart ¿?
 
 /*==================[internal functions declaration]=========================*/
 
+/*----------ESTO ES PARA PRUEBAS Y DESPUES SE BORRA----------*/
+/**
+ * @brief Función invocada en la interrupción del timer tareas
+ */
+/*void FuncTimerTareas(void *param)
+{
+	vTaskNotifyGiveFromISR(ventanas_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a ventanas
+}
+*/
 //---------------------no se si deberia ir una de estas aca---------------------------
 /**
  * @brief Función invocada en la interrupción del timer tareas
 *
 void FuncTimerTareas(void* param){
-    vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    // Envía una notificación a la tarea asociada a medir
-	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    // Envía una notificación a la tarea asociada a mostrar 
+	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    // Envía una notificación a la tarea asociada a medir
+	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    // Envía una notificación a la tarea asociada a mostrar
 }
 */
-
 
 /**
 * @brief Funcion invocada para leer y enviar los datos
@@ -72,13 +97,12 @@ static void TareaLeerEnviar(void *pvParameter){ //convierte un dato de analogico
 }
 */
 
-
 /**
  * @brief Funcion que mide el valor de la resistencia que sensa la luz
  */
-static void TareaMedir (void *pvParameter){
+/*static void TareaMedir (void *pvParameter){
 	while(true){
-		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) /* La tarea espera en este punto hasta recibir una notificación */
+		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) // La tarea espera en este punto hasta recibir una notificación
 		//medicion=la entrada analogica || aca le asigno el valor a medicion
 		if(medicion<iluminacion_ideal){
 			//comparo afuera y adentro y veo si abro ventanas o prendo luces
@@ -88,18 +112,28 @@ static void TareaMedir (void *pvParameter){
 		}
 	}
 }
+*/
 /**
- * @brief Funcion que se encarga de abrir y cerrar las ventanas 
+ * @brief Funcion que se encarga de abrir y cerrar las ventanas
  */
-static void TareaVentanas (void *pvParameter){
-	while(true){
-		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
-		switch (ventanas_abiertas){ //no se si hacerlo con un sitch o con un if
-			case 0:
-			//abrir ventanas e informar
+
+static void TareaVentanas(void *pvParameter)
+{
+	while (true)
+	{
+		// ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
+		vTaskDelay(5 * 1000 / portTICK_PERIOD_MS); //se abre/cierra cada 5 segundos ES DE PRUEBA
+		switch (ventanas_abiertas)
+		{
+		case 0:
+			angulo_servo = 90;
+			ServoMove(SERVO_0, angulo_servo);
+			ventanas_abiertas = 1;
 			break;
-			case 1:
-			//cerrar ventanas e infromar
+		case 1:
+			angulo_servo = -90;
+			ServoMove(SERVO_0, angulo_servo);
+			ventanas_abiertas = 0;
 			break;
 		}
 	}
@@ -107,10 +141,12 @@ static void TareaVentanas (void *pvParameter){
 /**
  * @brief Funcion que se encarga de prender y apagar las luces
  */
+
 static void TareaLuces (void *pvParameter){
 	while(true){
 		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
-			switch (luces_prendidas){ //no se si hacerlo con un sitch o con un if
+		vTaskDelay(5 * 1000 / portTICK_PERIOD_MS); //se prende/apaga cada 5 segundos ES DE PRUEBA
+			switch (luces_prendidas){
 			case 0:
 			//prender luces e informar
 			break;
@@ -123,11 +159,26 @@ static void TareaLuces (void *pvParameter){
 
 
 /*==================[external functions definition]==========================*/
-void app_main(void){
-	printf("Hello world!\n");
+void app_main(void)
+{
+	/*
+		timer_config_t timer_tareas = {
+			.timer = TIMER_A,
+			.period = CONFIG_TAREAS_PERIOD,
+			.func_p = FuncTimerTareas,
+			.param_p = NULL
+		};
+	*/
+	ServoInit(SERVO_0, GPIO_1); // inicializacion ser servo, como puedo conectar hasta 4 servos pongo el primero y uso la salida analogica q da pwm
+
+	//	TimerInit(&timer_tareas); // Inicializa el timer
 	/*si lo hago con una foto resistencia, el valor de resistecia sube en la oscuridad, por lo q disminuye la corriente
-	deberia conectarla a la entrada analogica de la placa y ahi varia la corriente, tengo alguna forma de variar el voltaje? 
+	deberia conectarla a la entrada analogica de la placa y ahi varia la corriente, tengo alguna forma de variar el voltaje?
 	deberia medir con una iluminacion q me guste y en base a eso hacer los calculos?
 	*/
+	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle); // tarea q se encarga de leer y enviar
+	xTaskCreate(&TareaLuces, "Prender y apagar", 1024, NULL, 5, &luces_task_handle); // tarea q se encarga de leer y enviar
+
+	//	TimerStart(timer_tareas.timer); // Inicializa el conteo del timer tareas
 }
 /*==================[end of file]============================================*/
