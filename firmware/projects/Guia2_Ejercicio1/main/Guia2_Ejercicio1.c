@@ -73,7 +73,7 @@ TaskHandle_t mostrar_task_handle = NULL;
 
 
 /*==================[internal functions declaration]=========================*/
-/*
+/**
  * @brief Función invocada para medir la distancia y prender o apagar los leds si es necesario
  */
 static void TareaMedir (void *pvParameter){
@@ -108,7 +108,7 @@ static void TareaMedir (void *pvParameter){
 		vTaskDelay(delay_tareas / portTICK_PERIOD_MS); /*delay de 1 segundo*/
 	}
 }
-/*
+/**
 * @brief Funcion invocada para detectar el estado del switch y si es el 1 deja de medir y si es el 2 mantiene la medicion en el display
 */
 static void TareaDetectarSwitches (void *pvParameter){
@@ -124,7 +124,7 @@ static void TareaDetectarSwitches (void *pvParameter){
 		vTaskDelay(delay_tareas / portTICK_PERIOD_MS); /*delay de 1 segundo*/
 	}
 }
-/*
+/**
  * @brief Funcion invocada para mostrar la medicion en el display
  */
 static void TareaMostrar (void *pvParameter){

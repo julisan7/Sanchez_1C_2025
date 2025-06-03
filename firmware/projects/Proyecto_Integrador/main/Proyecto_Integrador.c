@@ -142,7 +142,7 @@ static void TareaVentanas(void *pvParameter)
  * @brief Funcion que se encarga de prender y apagar las luces
  */
 
-static void TareaLuces (void *pvParameter){
+static void TareaLuces (void *pvParameter){//Paco me dijo q lo haga con un led
 	while(true){
 		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
 		vTaskDelay(5 * 1000 / portTICK_PERIOD_MS); //se prende/apaga cada 5 segundos ES DE PRUEBA

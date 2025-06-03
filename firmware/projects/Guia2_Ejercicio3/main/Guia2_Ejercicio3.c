@@ -73,7 +73,7 @@ TaskHandle_t mostrar_task_handle = NULL;
 TaskHandle_t uart_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
-/*
+/**
  * @brief Función invocada en la interrupción del timer tareas
  */
 void FuncTimerTareas(void *param)
@@ -82,7 +82,7 @@ void FuncTimerTareas(void *param)
 	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE); /* Envía una notificación a la tarea asociada a mostrar */
 	vTaskNotifyGiveFromISR(uart_task_handle, pdFALSE);
 }
-/*
+/**
  * @brief Función invocada para medir la distancia y prender o apagar los leds si es necesario
  */
 static void TareaMedir(void *pvParameter)
@@ -128,7 +128,7 @@ static void TareaMedir(void *pvParameter)
 	}
 }
 
-/*
+/**
  * @brief Funcion invocada para activar o prender la medicion
  */
 void Switch1OnOfMedicion()
@@ -136,7 +136,7 @@ void Switch1OnOfMedicion()
 	conmutar_medicion = !conmutar_medicion; // Cambia el estado de la variable de medicion
 }
 
-/*
+/**
  * @brief Funcion invocada para mantener en el display el valor de la medicion
  */
 void Switch2HoldMedicion()
@@ -144,7 +144,7 @@ void Switch2HoldMedicion()
 	guardar_medicion = !guardar_medicion; // Cambia el estado de la variable de guardar medicion
 	medicion_anterior = medicion;		  // Guarda la medicion actual
 }
-/*
+/**
  * @brief Funcion invocada para mostrar la medicion en el display
  */
 static void TareaMostrar(void *pvParameter)
@@ -169,7 +169,9 @@ static void TareaMostrar(void *pvParameter)
 		}
 	}
 }
-
+ /**
+  * @brief Tarea de la UART
+  */
 void UartTask(void *param)// Declaracion de la tarea de UART
 { 
 	while (true)
@@ -181,7 +183,7 @@ void UartTask(void *param)// Declaracion de la tarea de UART
 	}
 }
 
-/*
+/**
  * @brief Lee la entrada del usuario por el puerto serie y activa o mantiene la medicion
  */
 void LeerEntrada()
