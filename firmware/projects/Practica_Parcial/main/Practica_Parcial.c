@@ -195,7 +195,9 @@ void app_main(void){
 	.param_p = NULL,	// solo para modo continuo
 	.sample_frec = 0	//no lo vamos a usar
 	};
-
+	 
+	//deberia haber hecho el struct de la uart y inicializarlo.
+	
 	GPIOInit(GPIO_9, GPIO_INPUT); //entrada de la humerdad
 	GPIOInit(GPIO_18, GPIO_OUTPUT); //salida de bomba de agua
 	GPIOInit(GPIO_19, GPIO_OUTPUT); //salida de la bomba acida
