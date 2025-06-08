@@ -60,6 +60,11 @@ bool abrir_ventanas = 1;	  // 1 para abrir, 0 para cerrar
 bool prender_luces = 0; // 1 para prender, 0 para apagar
 uint16_t luz_interior;
 uint16_t luz_exterior;
+
+/**
+ * @def iluminacion_ideal
+ * @brief Valor en mV con el cual se compara la iluminacion interior
+ */
 uint16_t iluminacion_ideal=1650;	  // Valor optimo con el cual se compara la medicion en mV
 uint8_t angulo_servo;		  // angulo que se mueve el servo
 bool iluminacion_optima;
@@ -93,7 +98,10 @@ TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la 
 }
 */
 /**
+ * @fn static void TareaMedir (void *pvParameter)
  * @brief Funcion que mide el valor de la resistencia que sensa la luz
+ * @param [in]
+ * @return
  */
 static void TareaMedir (void *pvParameter){
 	while(true){
