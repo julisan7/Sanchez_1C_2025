@@ -41,10 +41,6 @@
  * |  Sensor de radiacion   |   ESP32   	|
  * |:----------------------:|:--------------|
  * | Entrada analogica	 	| 	CH1  		|
- * 
- * |    Peripheral  |   ESP32   	|
- * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
  *
  *
  * @section changelog Changelog
@@ -76,13 +72,37 @@
 #define CONFIG_HUMEDADYTEMPERATURA_PERIOD 1*1000*1000 //Periodo para las mediciones de humedad y temperatura timer (timer en microsegundos)
 #define CONFIG_RADIACION_PERIOD 5*1000*1000 //Periodo para la medicion de la radiacion
 
+/**
+ * @def nevada
+ * @brief booleano que cambia a 1 cuando se dan las condiciones para la nevada
+ */
 bool nevada=0;
+/**
+ * @def radiacion_alta
+ * @brief 1 si los niveles de radiacion superan los 40mR/h (1320 mV en la entrada analogica)
+ */
 bool radiacion_alta=0;
+/**
+ * @def encendido
+ * @brief booleano que cambia a false con el switch 2 y a true con el switch 1. Apaga todo el programa
+ */
 bool encendido=true;
 
-float humedad; //en porcentual
-float temperatura; //en grados
+/**
+ * @def humedad
+ * @brief humedad sensada en porcentaje
+ */
+float humedad;
+/**
+ * @def temperatura
+ * @brief temperatura sensada en grados
+ */
+float temperatura;
 
+/**
+ * @def radiacion
+ * @brief valor de la radiacion medida
+ */
 uint16_t radiacion;
 
 TaskHandle_t medir_radiacion_task_handle = NULL;
