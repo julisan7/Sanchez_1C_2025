@@ -103,6 +103,7 @@ TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la 
  * @param [in]
  * @return
  */
+TENDRIA QUE VER CUANTOS VOLTS SOPORTA LA ENTRADA ANALOGICA PQ POR AHI ME ESTOY PASANDO Y NO DETECTA NADA Y ME LLAMA AL WATCHDOG ¿?
 static void TareaMedir (void *pvParameter){
 	while(true){
 		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) // La tarea espera en este punto hasta recibir una notificación
