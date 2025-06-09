@@ -2,14 +2,14 @@
 #define _DHT11_H_
 
 /*! @file dht11.h
-/** \brief Driver for reading humiduty and temperature with DHT11.
+/** 
+ * \brief Driver for reading humiduty and temperature with DHT11.
  *
  * @note Temperature range: 0 / +50°C ±2°C
  * 
  * @note Humidity range: 20-90%RH ±5%RH
  *
  * @author Juani Cerrudo
-
  *
  * @note Hardware connections:
  *
