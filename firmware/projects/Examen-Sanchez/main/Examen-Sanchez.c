@@ -56,8 +56,16 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-#define CONFIG_HUMEDADYTEMPERATURA_PERIOD 1*1000*1000 //Periodo para las mediciones de humedad y temperatura timer (timer en microsegundos)
-#define CONFIG_RADIACION_PERIOD 5*1000*1000 //Periodo para la medicion de la radiacion
+/**
+ * @def CONFIG_HUMEDADYTEMPERATURA_PERIOD
+ * @brief Tiempo en segundos cada cual ser realiza medicion de humedad y temperatura
+ */
+#define CONFIG_HUMEDADYTEMPERATURA_PERIOD 1*1000*1000 
+/**
+ * @def CONFIG_RADIACION_PERIOD
+ * @brief Tiempo en segundos cada cual ser realiza medicion de la radiacion
+ */
+#define CONFIG_RADIACION_PERIOD 5*1000*1000 
 
 /**
  * @def nevada
