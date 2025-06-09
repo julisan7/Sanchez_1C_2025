@@ -3,21 +3,8 @@
  * @section genDesc General Description
  *
  * El sistema está compuesto por un sensor de humedad y temperatura DHT11 y un  sensor analógico de radiación.
- * se debe detectar el riesgo de nevada, la cual se da si la húmedad se encuentra por encima del 85%  y la temperatura entre 0 y 2ºC.
- * Para esto se deben tomar muestras cada 1 segundo y se envían por UART con el siguiente formato:
- * “Temperatura: 10ºC - Húmedad: 70%”
- *
- * 
- * Si se da la condición de riesgo de nevada se debe indicar el estado encendiendo el led Rojo de la placa,
- * además del envío de un mensaje por la UART:
- * “Temperatura: 1ºC - Húmedad: 90% - RIESGO DE NEVADA”
- * Además se debe monitorizar la radiación ambiente, para ello se cuenta con un sensor analógico que da una salida
- * de 0V para 0mR/h y 3.3V para una salida de 100 mR/h. Se deben tomar muestras de radiación cada 5 segundos,
- * enviando el mensaje por UART:
- * “Radiación 30mR/h”
- * Si se sobrepasan los 40mR/h se debe informar del riesgo por Radiación, encendiendo el led Amarillo de la placa,
- * y enviando en el mensaje:
- * “Radiación 50mR/h - RADIACIÓN ELEVADA”
+ * Se informa el valor de la humedad, de la temperatura y si existe el riesgo de nevada se prende el led rojo.
+ * Cada 5 segundos se muestrea la radiacion ambiente y se informa su valor y si esta elevada se avisa por uart y se prende el led amarillo
  * Si no hay riesgo de nevada ni radiación excesiva, se indicará con el led Verde esta situación.
  * El botón 1 se utilizará para encender el dispositivo, comenzando el muestreo de los sensores y el envío de información.
  * El botón 2 apaga el dispositivo, deteniendo el proceso de muestreo y apagando todas las notificaciones. 
@@ -117,20 +104,22 @@ TaskHandle_t notificar_radiacion_task_handle = NULL;
  * @return nada
  */
 static void TareaMedirRadiacion(void *pvParametro){
-	while (encendido){
+	while (true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		AnalogInputReadSingle(CH1,&radiacion);
-		if (radiacion > 1320){
-			radiacion_alta=1;
-			LedOn(LED_2);
-			LedOff(LED_1);
-		}
-		else {
-			radiacion_alta=0;
-			LedOff(LED_2);
-		}
-		if (nevada==0){
-			LedOn(LED_1);//preguntamos y dijeron que el 1 es el verde
+		if(encendido){
+			AnalogInputReadSingle(CH1,&radiacion);
+			if (radiacion > 1320){
+				radiacion_alta=1;
+				LedOn(LED_2);
+				LedOff(LED_1);
+			}
+			else {
+				radiacion_alta=0;
+				LedOff(LED_2);
+			}
+			if (nevada==0){
+				LedOn(LED_1);//preguntamos y dijeron que el 1 es el verde
+			}
 		}
 	}
 }
@@ -141,17 +130,19 @@ static void TareaMedirRadiacion(void *pvParametro){
  * @return nada
  */
 static void TareaVerificarNevada(void *pvParametro){
-	while (encendido){
+	while (true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		dht11Read(&humedad,&temperatura);
-		if(humedad>85){
-			if(temperatura>0 && temperatura <2){
-				nevada=1;
-				LedOn(LED_3); //preguntamos y dijeron que el 3 es el rojo
-				LedOff(LED_1);
-			}
-			else {
-				LedOff(LED_3);
+		if (encendido){
+			dht11Read(&humedad,&temperatura);
+			if(humedad>85){
+				if(temperatura>0 && temperatura <2){
+					nevada=1;
+					LedOn(LED_3); //preguntamos y dijeron que el 3 es el rojo
+					LedOff(LED_1);
+				}
+				else {
+					LedOff(LED_3);
+				}
 			}
 		}
 	}
@@ -164,18 +155,20 @@ static void TareaVerificarNevada(void *pvParametro){
  * @return nada
  */
 static void TareaHumedadyTemperaturaUART(void *pvParametro){
-	while(encendido){
+	while(true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		UartSendString(UART_PC, "Temperatura:");
-		UartSendString(UART_PC, (char *)UartItoa(temperatura, 10));
-		UartSendString(UART_PC, " - Humedad:");
-		UartSendString(UART_PC, (char *)UartItoa(humedad, 10));
-		UartSendString(UART_PC, "%");
-		if (nevada==1){
-			UartSendString(UART_PC, " - RIESGO DE NEVADA \r\n");
-		}
-		else {
-			UartSendString(UART_PC, "\r\n");
+		if (encendido){
+			UartSendString(UART_PC, "Temperatura:");
+			UartSendString(UART_PC, (char *)UartItoa(temperatura, 10));
+			UartSendString(UART_PC, " - Humedad:");
+			UartSendString(UART_PC, (char *)UartItoa(humedad, 10));
+			UartSendString(UART_PC, "%");
+			if (nevada==1){
+				UartSendString(UART_PC, " - RIESGO DE NEVADA \r\n");
+			}
+			else {
+				UartSendString(UART_PC, "\r\n");
+			}
 		}
 	}
 }
@@ -185,16 +178,18 @@ static void TareaHumedadyTemperaturaUART(void *pvParametro){
  * @return nada
  */
 static void TareaRadiacionUART(void *pvParametro){
-	while(encendido){
+	while(true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); /* La tarea espera en este punto hasta recibir una notificación */
-		UartSendString(UART_PC, "Radiación:");
-		UartSendString(UART_PC, (char *)UartItoa(radiacion, 10));
-		UartSendString(UART_PC, "mR/h");
-		if (radiacion_alta==1){
-			UartSendString(UART_PC, " - RADIACÓN ELEVADA\r\n");
-		}
-		else {
-			UartSendString(UART_PC, "\r\n");
+		if (encendido){
+			UartSendString(UART_PC, "Radiación:");
+			UartSendString(UART_PC, (char *)UartItoa(radiacion, 10));
+			UartSendString(UART_PC, "mR/h");
+			if (radiacion_alta==1){
+				UartSendString(UART_PC, " - RADIACÓN ELEVADA\r\n");
+			}
+			else {
+				UartSendString(UART_PC, "\r\n");
+			}
 		}
 	}
 }
@@ -240,14 +235,14 @@ void Switch2Off()
 
 /*==================[external functions definition]==========================*/
 void app_main(void){
-	timer_config_t timer_humytemp = { //timer para medir
+	timer_config_t timer_humytemp = {
 	.timer = TIMER_A,
 	.period = CONFIG_HUMEDADYTEMPERATURA_PERIOD,
 	.func_p = FuncTimer1seg,
 	.param_p = NULL
 	};
 	
-	timer_config_t timer_radiacion = { //timer para notificar
+	timer_config_t timer_radiacion = { 
 	.timer = TIMER_B,
 	.period = CONFIG_RADIACION_PERIOD,
 	.func_p = FuncTimer5seg,
@@ -255,11 +250,11 @@ void app_main(void){
 	};
 
 	analog_input_config_t canal_1 ={
-	.input = CH1,		//canal1
-	.mode = ADC_SINGLE, //single porque solo va por interrupciones
-	.func_p = NULL,		// solo para modo continuo
-	.param_p = NULL,	// solo para modo continuo
-	.sample_frec = 0	//no lo vamos a usar
+	.input = CH1,		
+	.mode = ADC_SINGLE, 
+	.func_p = NULL,		
+	.param_p = NULL,	
+	.sample_frec = 0	
 	};
 
 	serial_config_t my_uart = {
@@ -281,9 +276,8 @@ void app_main(void){
 
 	AnalogInputInit(&canal_1);
 
-	SwitchActivInt(SWITCH_1, &Switch1On, NULL); // Activa la interrupcion del switch 1
-	SwitchActivInt(SWITCH_2, &Switch2Off, NULL); // Activa la interrupcion del switch 2
-
+	SwitchActivInt(SWITCH_1, &Switch1On, NULL);
+	SwitchActivInt(SWITCH_2, &Switch2Off, NULL); 
 
 	xTaskCreate(&TareaMedirRadiacion, "Medir radiacion", 1024, NULL, 5, &medir_radiacion_task_handle);
 	xTaskCreate(&TareaVerificarNevada, "Verificar nevada", 1024, NULL, 5, &verificar_nevada_task_handle);
