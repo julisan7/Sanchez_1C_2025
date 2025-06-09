@@ -22,13 +22,13 @@
  * |   	DHT11		|   ESP-EDU 	|
  * |:--------------:|:--------------|
  * | 	VCC     	|	3V3     	|
- * | 	DATA	 	| 	GPIO_#		|
+ * | 	DATA	 	| 	GPIO_9		|
  * | 	GND		 	| 	GND 		|
  * 
  * |  Sensor de radiacion   |   ESP32   	|
  * |:----------------------:|:--------------|
  * | Entrada analogica	 	| 	CH1  		|
- *
+ * 
  *
  * @section changelog Changelog
  *
