@@ -112,7 +112,8 @@
             "pwm_mcu.h": "c",
             "cstdint": "c",
             "servo_sg90.h": "c",
-            "stdio.h": "c"
+            "stdio.h": "c",
+            "random": "c"
         },
     },
     "tasks": {

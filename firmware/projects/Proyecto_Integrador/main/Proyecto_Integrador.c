@@ -33,6 +33,11 @@
  * |            | la tarea medir                                 |
  * | 28/05/2025 | Se esquematizan las tareas ventanas y luces    |
  * | 30/05/2025 | Implementacion del motor servo, funciona       |
+ * | 06/06/2025 | Creacion de la tarea medir, no funciona        |
+ * | 10/06/2025 | Cambios en la tarea medir y en la tarea lucez, |
+ * | 			| ambas compilan y flashean de forma correcta, 	 |
+ * | 			| pero con problemas de logica. Ver si añadiendo |
+ * | 			| el servo esto se arregla (igual reveer medir)  |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -58,14 +63,15 @@
 /*==================[internal data definition]===============================*/
 bool abrir_ventanas = 1;	  // 1 para abrir, 0 para cerrar
 bool prender_luces = 0; // 1 para prender, 0 para apagar
-uint16_t luz_interior;
-uint16_t luz_exterior;
+uint16_t luz_interior=0;
+uint16_t luz_exterior=0;
 
 /**
  * @def iluminacion_ideal
  * @brief Valor en mV con el cual se compara la iluminacion interior
  */
 uint16_t iluminacion_ideal=1650;	  // Valor optimo con el cual se compara la medicion en mV
+
 uint8_t angulo_servo;		  // angulo que se mueve el servo
 bool iluminacion_optima;
 
@@ -103,35 +109,46 @@ TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la 
  * @param [in]
  * @return
  */
-TENDRIA QUE VER CUANTOS VOLTS SOPORTA LA ENTRADA ANALOGICA PQ POR AHI ME ESTOY PASANDO Y NO DETECTA NADA Y ME LLAMA AL WATCHDOG ¿?
 static void TareaMedir (void *pvParameter){
 	while(true){
 		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) // La tarea espera en este punto hasta recibir una notificación
-		vTaskDelay(4 * 1000 / portTICK_PERIOD_MS);
+		
 		AnalogInputReadSingle(CH2,&luz_interior);
 		AnalogInputReadSingle(CH3,&luz_exterior);
+		
 		if(luz_interior<iluminacion_ideal){
 			if (abrir_ventanas==1){
 				prender_luces=1;
-				printf("hay que prender las luces");
+
+				printf("hay que prender las luces\r\n");
 			}
 			else{
-				if(luz_exterior>=iluminacion_ideal){
+
+				if(luz_exterior>iluminacion_ideal){
 					abrir_ventanas=1;
-					printf("hay que abrir la ventana");
-				}
+
+					printf("hay que abrir la ventana\r\n");
+				}				
 				else{
-				prender_luces=1;
+					prender_luces=1;
 				}
 			}
 			
 		}
-		else iluminacion_optima=1;
+		else {
+			iluminacion_optima=1;
+			printf("La iluminacion es optima\r\n");
+		}
+		vTaskDelay(2 * 1000 / portTICK_PERIOD_MS);
+		printf("delay\r\n");
 	}
 }
 
 /**
+ * @fn static void TareaVentanas(void *pvParameter)
  * @brief Funcion que se encarga de abrir y cerrar las ventanas
+ * @param 
+ * @return nada
  */
 
 /*static void TareaVentanas(void *pvParameter)
@@ -155,26 +172,37 @@ static void TareaMedir (void *pvParameter){
 		}
 	}
 }*/
-/**
- * @brief Funcion que se encarga de prender y apagar las luces
- */
 
+/**
+ * @fn static void TareaLuces (void *pvParameter)
+ * @brief Funcion que se encarga de prender y apagar las luces
+ * @param [in]
+ * @return
+ */
 static void TareaLuces (void *pvParameter){//Paco me dijo q lo haga con un led
+	GPIOOff(GPIO_9);//la luz inicia apagada
 	while(true){
 		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
-		vTaskDelay(4 * 1000 / portTICK_PERIOD_MS); //se prende/apaga cada 5 segundos ES DE PRUEBA
+
 			switch (prender_luces){
-			case 0:
-			GPIOOn(GPIO_9);
-			prender_luces=1;
-			printf("se prende luz");
-			break;
-			case 1:
-			GPIOOff(GPIO_9);
-			prender_luces=0;
-			printf("se apaga luz");
-			break;
+				case 0:
+
+					GPIOOn(GPIO_9);
+					prender_luces=1;
+
+					printf("se prende luz\r\n");
+				break;
+
+				case 1:
+
+					GPIOOff(GPIO_9);
+					prender_luces=0;
+
+					printf("se apaga luz\r\n");
+				break;
 		}
+		vTaskDelay(1 * 1000 / portTICK_PERIOD_MS); //se prende/apaga cada 5 segundos ES DE PRUEBA
+		printf("delay luces\r\n");
 	}
 }
 
@@ -208,7 +236,6 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
-
 /*	timer_config_t timer_mediciones = { //timer para medir
 	.timer = TIMER_A,
 	.period = CONFIG_MEDICION_PERIOD,
@@ -248,8 +275,7 @@ void app_main(void)
 	AnalogInputInit(&canal_2);
 	AnalogInputInit(&canal_3);
 
-	GPIOInit(GPIO_9, GPIO_OUTPUT); //salida para el led
-	GPIOOff(GPIO_9);
+	GPIOInit(GPIO_9, GPIO_OUTPUT); //salida para el led **ACA MARCA UN PIQUITO RJO :(
 
 //	ServoInit(SERVO_0, GPIO_1); // inicializacion ser servo, como puedo conectar hasta 4 servos pongo el primero y uso la salida analogica q da pwm
 
@@ -257,9 +283,9 @@ void app_main(void)
 //	TimerInit(&timer_mediciones); // Inicializa el timer A
 //	TimerInit(&timer_notificacion); // Inicializa el timer B
 
-	xTaskCreate(&TareaMedir, "Medir iluminacion", 1024, NULL, 5, &medir_task_handle);
+	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 //	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle); // tarea q se encarga de leer y enviar
-	xTaskCreate(&TareaLuces, "Prender y apagar", 1024, NULL, 5, &luces_task_handle); // tarea q se encarga de leer y enviar
+	xTaskCreate(&TareaLuces, "Prender y apagar", 4096, NULL, 5, &luces_task_handle); // tarea q se encarga de leer y enviar
 //	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
 
 //	TimerStart(timer_mediciones.timer);
