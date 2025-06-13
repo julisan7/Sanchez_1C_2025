@@ -115,7 +115,8 @@
             "stdio.h": "c",
             "random": "c",
             "rtc_mcu.h": "c",
-            "compare": "c"
+            "compare": "c",
+            "rtc.h": "c"
         },
     },
     "tasks": {
