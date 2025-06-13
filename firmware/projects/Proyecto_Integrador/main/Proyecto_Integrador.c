@@ -64,10 +64,10 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-bool ventanas_abiertas = 1;	  // 1 para abrir, 0 para cerrar
-bool prender_luces = 0; // 1 para prender, 0 para apagar
-uint16_t luz_interior=0;
-uint16_t luz_exterior=0;
+static bool ventanas_abiertas = 0;	  // 1 para abrir, 0 para cerrar
+static bool prender_luces = 0; // 1 para prender, 0 para apagar
+static uint16_t luz_interior;
+static uint16_t luz_exterior=0;
 
 bool prender_sistema=0; 
 
@@ -76,20 +76,6 @@ uint8_t minutos_actual;
 uint8_t hora_apagado;
 uint8_t minutos_apagado;
 
-/*	typedef struct {
-   uint16_t year;	    
-   uint8_t  month;      
-   uint8_t  mday;	    
-   uint8_t  wday;	   
-   uint8_t  hour;	   
-   uint8_t  min;	   
-   uint8_t  sec;	   
-} rtc_t;
-*/
-
-//rtc_t actual; //por que me tira error? ya no 
-//rtc_t apagado;
-
 /**
  * @def iluminacion_ideal
  * @brief Valor en mV con el cual se compara la iluminacion interior
@@ -97,15 +83,37 @@ uint8_t minutos_apagado;
 uint16_t iluminacion_ideal=1650;	  // Valor optimo con el cual se compara la medicion en mV
 
 uint8_t angulo_servo;		  // angulo que se mueve el servo
+
 bool iluminacion_optima;
 
 #define CONFIG_TAREAS_PERIOD 3*1000*1000 //Periodo para las meidiciones
-//#define CONFIG_AVISO_PERIOD 5*1000*1000 //Periodo para informar en segundos porque el timer esta en microsegundos
 
 TaskHandle_t medir_task_handle = NULL;		// tarea que mide
 TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventanas
-TaskHandle_t luces_task_handle = NULL;		// tarea que prende y apaga las luces
-TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la uart ¿?
+TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la uart
+
+//ver por que esto no anda ¿?
+/*
+rtc_t actual={
+	.year=2025,
+	.month=06,
+	.mday=23,
+   	.wday=1,
+    .hour=0,	
+    .min=0,	   
+    .sec=5,
+};
+*/
+/*
+rtc_t apagado={
+	.year=2025,
+	.month=06,
+    .mday=23,
+   	.wday=1,
+    .hour=0,
+    .min=0,
+    .sec=5	
+}; */
 
 /*==================[internal functions declaration]=========================*/
 
@@ -121,7 +129,6 @@ void FuncTimer3seg(void *param)
 	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a medir
 	vTaskNotifyGiveFromISR(ventanas_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a ventanas
 	vTaskNotifyGiveFromISR(notificar_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a UART
-//	vTaskNotifyGiveFromISR(luces_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a luces
 }
 
 /**
@@ -136,6 +143,11 @@ static void TareaMedir (void *pvParameter)
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
 		AnalogInputReadSingle(CH2,&luz_interior);
+		
+		UartSendString(UART_PC, "Luz en el interior: ");
+		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
+		UartSendString(UART_PC, "\r\n");
+
 		AnalogInputReadSingle(CH3,&luz_exterior);
 		if (ventanas_abiertas==1){
 			if(luz_interior<iluminacion_ideal){
@@ -180,57 +192,21 @@ static void TareaVentanas(void *pvParameter)
 	while (true)
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); 
-		//vTaskDelay(2 * 1000 / portTICK_PERIOD_MS); //se abre/cierra cada 5 segundos ES DE PRUEBA
+		
 		switch (ventanas_abiertas)
 		{
 		case 0:
 			angulo_servo = 90;
 			ServoMove(SERVO_0, angulo_servo);
-			//ventanas_abiertas = 1;
 			break;
 		case 1:
 			angulo_servo = -90;
 			ServoMove(SERVO_0, angulo_servo);
-			//ventanas_abiertas = 0;
 			break;
 		}
 	}
 }
 
-/**
- * @fn static void TareaLuces (void *pvParameter)
- * @brief Funcion que se encarga de prender y apagar las luces
- * @param [in]
- * @return
- */
-/*
-static void TareaLuces (void *pvParameter){//Paco me dijo q lo haga con un led
-	GPIOOff(GPIO_9);//la luz inicia apagada
-	while(true){
-		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
-
-			switch (prender_luces){
-				case 0:
-
-					GPIOOn(GPIO_9);
-					prender_luces=1;
-
-					printf("se prende luz\r\n");
-				break;
-
-				case 1:
-
-					GPIOOff(GPIO_9);
-					prender_luces=0;
-
-					printf("se apaga luz\r\n");
-				break;
-		}
-		vTaskDelay(1 * 1000 / portTICK_PERIOD_MS); //se prende/apaga cada 5 segundos ES DE PRUEBA
-		printf("delay luces\r\n");
-	}
-}
-*/
 /**
  *  @fn TareaNotificarUART(void *pvParameter)
  * @brief Tarea que notifica por UART el estado del programa
@@ -239,15 +215,9 @@ static void TareaLuces (void *pvParameter){//Paco me dijo q lo haga con un led
  */
 static void TareaNotificarUART(void *pvParameter){ //UART
 	while (true){
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //La tarea espera en este punto hasta recibir una notificación
-	
-		UartSendString(UART_PC, "Luz en el interior: ");
-		luz_interior=10;
-		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
-		if(iluminacion_optima==1){
-			UartSendString(UART_PC, ", la iluminacion es correcta. \r\n");
-		}
-		else UartSendString(UART_PC, ", la iluminacion es incorrecta. \r\n");
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+		//UartSendString(UART_PC, "Luz en el interior: "); 
+		//UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10)); // esto me tira 0
 		if(ventanas_abiertas==1){
 			UartSendString(UART_PC, "Las ventanas estan abiertas. \r\n");
 		}
@@ -266,9 +236,8 @@ static void TareaNotificarUART(void *pvParameter){ //UART
  */
 /*
 static void inicio(){
-	uint16_t bytes_de_lectura=2;//2?
+	uint16_t bytes_de_lectura=2;
 
-	//tambien le hago ingresar el mes y el año?
 	UartSendString(UART_PC, "Hola. Por favor ingrese la hora actual (hh): ");
 	UartReadBuffer(UART_PC,&actual->hour, bytes_de_lectura);
 	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
@@ -287,7 +256,8 @@ static void inicio(){
 	UartSendString(UART_PC, " horas. ");
 	prender_sistema=1;// preguntar si esto puede ir en los while(true)
 
-}*/
+}
+*/
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
@@ -320,7 +290,17 @@ void app_main(void)
 		.func_p = NULL,
 		.param_p = NULL
 	};
-
+/*
+	rtc_t actual = {
+		.year = 2025,
+		.month = 06,
+		.mday = 23,
+   		.wday = 1,
+    	.hour = 0,	
+		.min = 0,	   
+		.sec = 5,
+    }; 
+*/
 	AnalogInputInit(&canal_2);
 	AnalogInputInit(&canal_3);
 
@@ -337,7 +317,6 @@ void app_main(void)
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
 	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
-//	xTaskCreate(&TareaLuces, "Prender y apagar", 4096, NULL, 5, &luces_task_handle); // tarea q se encarga de leer y enviar
 	TimerStart(timer_tareas.timer);
 
 }

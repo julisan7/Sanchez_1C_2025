@@ -114,7 +114,8 @@
             "servo_sg90.h": "c",
             "stdio.h": "c",
             "random": "c",
-            "rtc_mcu.h": "c"
+            "rtc_mcu.h": "c",
+            "compare": "c"
         },
     },
     "tasks": {
