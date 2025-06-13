@@ -141,19 +141,16 @@ static void TareaMedir (void *pvParameter)
 			if(luz_interior<iluminacion_ideal){
 				if(luz_exterior>iluminacion_ideal){
 					prender_luces=1;
-					printf("hay que prender las luces\r\n");
 					GPIOOn(GPIO_9);
 				}
 				else {
 					if(luz_exterior<iluminacion_ideal){
 						ventanas_abiertas=0;
-					printf("hay que cerrar las ventanas\r\n");
 					}
 				}
 			}
 			else{
 				iluminacion_optima=1;
-				printf("La iluminacion es optima\r\n");
 			}
 		}
 		else{
@@ -161,17 +158,13 @@ static void TareaMedir (void *pvParameter)
 				if(luz_exterior>iluminacion_ideal){
 					GPIOOff(GPIO_9);
 					ventanas_abiertas=1;
-					printf("hay que abrir las ventanas\r\n");
 				}
 				if(luz_exterior<iluminacion_ideal) {
 					prender_luces=1;
 					GPIOOn(GPIO_9);
-					printf("hay que prender las luces\r\n");
 				}
 			}
 		}
-		//vTaskDelay(2 * 1000 / portTICK_PERIOD_MS);
-		printf("delay\r\n");
 	}
 }
 
@@ -194,16 +187,13 @@ static void TareaVentanas(void *pvParameter)
 			angulo_servo = 90;
 			ServoMove(SERVO_0, angulo_servo);
 			//ventanas_abiertas = 1;
-			printf("**abrir ventanas**\r\n");
 			break;
 		case 1:
 			angulo_servo = -90;
 			ServoMove(SERVO_0, angulo_servo);
 			//ventanas_abiertas = 0;
-			printf("**cerrar ventanas**\r\n");
 			break;
 		}
-		printf("delay\r\n");
 	}
 }
 
@@ -252,6 +242,7 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //La tarea espera en este punto hasta recibir una notificación
 	
 		UartSendString(UART_PC, "Luz en el interior: ");
+		luz_interior=10;
 		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
 		if(iluminacion_optima==1){
 			UartSendString(UART_PC, ", la iluminacion es correcta. \r\n");
@@ -265,7 +256,6 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 			UartSendString(UART_PC, "Las luces estan encendidas. \r\n");
 		}
 		else UartSendString(UART_PC, "Las luces estan apagadas. \r\n");
-
 	}
 }
 /**
