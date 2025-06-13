@@ -19,10 +19,10 @@
  * 
  * |    LDR            |   ESP32   	| 5v
  * |:-----------------:|:-----------| 1k
- * | Lector analogico  |   GPIO 2  	| LDR
- * | Lector analogico  |   GPIO 3  	| Aca deberia ir el cable de la entrada pq mido caida de tension
- * | RED LED           |   GPIO 9  	| 1K2
- * 									  GND  (esto en ambos casos, dejo la proto armada en el casillero)  
+ * | Luz interior	   |   GPIO 2  	| Aca deberia ir el cable de la entrada pq mido caida de tensionLDR
+ * | Luz exterior	   |   GPIO 3  	| LDR
+ * | RED LED           |   GPIO 9  	| GND  (esto en ambos casos, dejo la proto armada en el casillero) 
+ * 									   
  *
  * @section changelog Changelog
  *
@@ -64,7 +64,7 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-bool abrir_ventanas = 0;	  // 1 para abrir, 0 para cerrar
+bool ventanas_abiertas = 1;	  // 1 para abrir, 0 para cerrar
 bool prender_luces = 0; // 1 para prender, 0 para apagar
 uint16_t luz_interior=0;
 uint16_t luz_exterior=0;
@@ -87,8 +87,8 @@ uint8_t minutos_apagado;
 } rtc_t;
 */
 
-rtc_t actual; //por que me tira error?
-rtc_t apagado;
+//rtc_t actual; //por que me tira error? ya no 
+//rtc_t apagado;
 
 /**
  * @def iluminacion_ideal
@@ -99,8 +99,8 @@ uint16_t iluminacion_ideal=1650;	  // Valor optimo con el cual se compara la med
 uint8_t angulo_servo;		  // angulo que se mueve el servo
 bool iluminacion_optima;
 
-#define CONFIG_MEDICION_PERIOD 3*1000*1000 //Periodo para las meidiciones
-#define CONFIG_AVISO_PERIOD 5*1000*1000 //Periodo para informar en segundos porque el timer esta en microsegundos
+#define CONFIG_TAREAS_PERIOD 3*1000*1000 //Periodo para las meidiciones
+//#define CONFIG_AVISO_PERIOD 5*1000*1000 //Periodo para informar en segundos porque el timer esta en microsegundos
 
 TaskHandle_t medir_task_handle = NULL;		// tarea que mide
 TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventanas
@@ -111,59 +111,66 @@ TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la 
 
 
 /**
+ *  @fn FuncTimer3seg(void *param)
  * @brief Funcion del Timer A que llama a las tareas cada 3 segundos
+ * @param [in]
+ * @return
  */
-/*void FuncTimer3seg(void *param)
+void FuncTimer3seg(void *param)
 {
 	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a medir
 	vTaskNotifyGiveFromISR(ventanas_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a ventanas
-	vTaskNotifyGiveFromISR(luces_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a luces
+	vTaskNotifyGiveFromISR(notificar_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a UART
+//	vTaskNotifyGiveFromISR(luces_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a luces
 }
-*/
-/**
- * @brief Funcion del Timer B que llama a las tareas cada 5 segundos
- */
-/*void FuncTimer5seg(){
-	vTaskNotifyGiveFromISR(notificar_task_handle, pdFALSE); //Envía una notificación a la tarea asociada a notificar
-}
-*/
+
 /**
  * @fn static void TareaMedir (void *pvParameter)
  * @brief Funcion que mide el valor de la resistencia que sensa la luz
  * @param [in]
  * @return
  */
-static void TareaMedir (void *pvParameter){
+static void TareaMedir (void *pvParameter)
+{
 	while(true){
-		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // creo q aca no es portMAX_DELAY si no q quiero q sea cada 5 minutos (ver cuanto es el tiempo ideal) // La tarea espera en este punto hasta recibir una notificación
-		
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
 		AnalogInputReadSingle(CH2,&luz_interior);
 		AnalogInputReadSingle(CH3,&luz_exterior);
-		
-		if(luz_interior<iluminacion_ideal){
-			if (abrir_ventanas==1){
-				prender_luces=1;
-
-				printf("hay que prender las luces\r\n");
-			}
-			else{
-
+		if (ventanas_abiertas==1){
+			if(luz_interior<iluminacion_ideal){
 				if(luz_exterior>iluminacion_ideal){
-					abrir_ventanas=1;
-
-					printf("hay que abrir la ventana\r\n");
-				}				
-				else{
 					prender_luces=1;
+					printf("hay que prender las luces\r\n");
+					GPIOOn(GPIO_9);
+				}
+				else {
+					if(luz_exterior<iluminacion_ideal){
+						ventanas_abiertas=0;
+					printf("hay que cerrar las ventanas\r\n");
+					}
 				}
 			}
-			
+			else{
+				iluminacion_optima=1;
+				printf("La iluminacion es optima\r\n");
+			}
 		}
-		else {
-			iluminacion_optima=1;
-			printf("La iluminacion es optima\r\n");
+		else{
+			if(ventanas_abiertas==0){
+				if(luz_exterior>iluminacion_ideal){
+					GPIOOff(GPIO_9);
+					ventanas_abiertas=1;
+					printf("hay que abrir las ventanas\r\n");
+				}
+				if(luz_exterior<iluminacion_ideal) {
+					prender_luces=1;
+					GPIOOn(GPIO_9);
+					printf("hay que prender las luces\r\n");
+				}
+			}
 		}
-		vTaskDelay(2 * 1000 / portTICK_PERIOD_MS);
+		//vTaskDelay(2 * 1000 / portTICK_PERIOD_MS);
 		printf("delay\r\n");
 	}
 }
@@ -175,27 +182,30 @@ static void TareaMedir (void *pvParameter){
  * @return nada
  */
 
-/*static void TareaVentanas(void *pvParameter)
+static void TareaVentanas(void *pvParameter)
 {	
 	while (true)
 	{
-		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //espera a recibir la notificacion
-		vTaskDelay(4 * 1000 / portTICK_PERIOD_MS); //se abre/cierra cada 5 segundos ES DE PRUEBA
-		switch (abrir_ventanas)
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); 
+		//vTaskDelay(2 * 1000 / portTICK_PERIOD_MS); //se abre/cierra cada 5 segundos ES DE PRUEBA
+		switch (ventanas_abiertas)
 		{
 		case 0:
 			angulo_servo = 90;
 			ServoMove(SERVO_0, angulo_servo);
-			abrir_ventanas = 1;
+			//ventanas_abiertas = 1;
+			printf("**abrir ventanas**\r\n");
 			break;
 		case 1:
 			angulo_servo = -90;
 			ServoMove(SERVO_0, angulo_servo);
-			abrir_ventanas = 0;
+			//ventanas_abiertas = 0;
+			printf("**cerrar ventanas**\r\n");
 			break;
 		}
+		printf("delay\r\n");
 	}
-}*/
+}
 
 /**
  * @fn static void TareaLuces (void *pvParameter)
@@ -203,6 +213,7 @@ static void TareaMedir (void *pvParameter){
  * @param [in]
  * @return
  */
+/*
 static void TareaLuces (void *pvParameter){//Paco me dijo q lo haga con un led
 	GPIOOff(GPIO_9);//la luz inicia apagada
 	while(true){
@@ -229,22 +240,24 @@ static void TareaLuces (void *pvParameter){//Paco me dijo q lo haga con un led
 		printf("delay luces\r\n");
 	}
 }
-
+*/
 /**
- * @brief Tarea que notifica por UART el estado cada 5 segundos
+ *  @fn TareaNotificarUART(void *pvParameter)
+ * @brief Tarea que notifica por UART el estado del programa
+ * @param [in]
+ * @return
  */
-/*
 static void TareaNotificarUART(void *pvParameter){ //UART
 	while (true){
-		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //La tarea espera en este punto hasta recibir una notificación
-		vTaskDelay(5 * 1000 / portTICK_PERIOD_MS);
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //La tarea espera en este punto hasta recibir una notificación
+	
 		UartSendString(UART_PC, "Luz en el interior: ");
 		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
 		if(iluminacion_optima==1){
 			UartSendString(UART_PC, ", la iluminacion es correcta. \r\n");
 		}
 		else UartSendString(UART_PC, ", la iluminacion es incorrecta. \r\n");
-		if(abrir_ventanas==1){
+		if(ventanas_abiertas==1){
 			UartSendString(UART_PC, "Las ventanas estan abiertas. \r\n");
 		}
 		else UartSendString(UART_PC, "Las ventanas estan cerradas. \r\n");
@@ -255,13 +268,13 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 
 	}
 }
-*/
 /**
  * @fn static void inicio(void *pvParameter)
  * @brief Funcion que determina las horas de encendido y apagado
  * @param [in]
  * @return
  */
+/*
 static void inicio(){
 	uint16_t bytes_de_lectura=2;//2?
 
@@ -284,24 +297,17 @@ static void inicio(){
 	UartSendString(UART_PC, " horas. ");
 	prender_sistema=1;// preguntar si esto puede ir en los while(true)
 
-}
+}*/
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
-/*	timer_config_t timer_mediciones = { //timer para medir
+	timer_config_t timer_tareas = {
 	.timer = TIMER_A,
-	.period = CONFIG_MEDICION_PERIOD,
+	.period = CONFIG_TAREAS_PERIOD,
 	.func_p = FuncTimer3seg,
 	.param_p = NULL
 	};
-	
-	timer_config_t timer_notificacion = { //timer para notificar
-	.timer = TIMER_B,
-	.period = CONFIG_AVISO_PERIOD,
-	.func_p = FuncTimer5seg,
-	.param_p = NULL
-	};
-*/
+
 	analog_input_config_t canal_2 ={
 	.input = CH2,		//canal2
 	.mode = ADC_SINGLE, //single porque solo va por interrupciones
@@ -318,31 +324,31 @@ void app_main(void)
 	.sample_frec = 0	//no lo vamos a usar
 	};
 
-/*	serial_config_t my_uart = {
+	serial_config_t my_uart = {
 		.port = UART_PC,
 		.baud_rate = 9600,
 		.func_p = NULL,
-		.param_p = NULL};
-*/
+		.param_p = NULL
+	};
+
 	AnalogInputInit(&canal_2);
 	AnalogInputInit(&canal_3);
 
 	GPIOInit(GPIO_9, GPIO_OUTPUT); //salida para el led **ACA MARCA UN PIQUITO RJO :(
 
-//	ServoInit(SERVO_0, GPIO_1); // inicializacion ser servo, como puedo conectar hasta 4 servos pongo el primero y uso la salida analogica q da pwm
+	ServoInit(SERVO_0, GPIO_1); // inicializacion ser servo, como puedo conectar hasta 4 servos pongo el primero y uso la salida analogica q da pwm
 
-//	UartInit(&my_uart);
-//	TimerInit(&timer_mediciones); // Inicializa el timer A
-//	TimerInit(&timer_notificacion); // Inicializa el timer B
+	UartInit(&my_uart);
+	TimerInit(&timer_tareas); // Inicializa el timer A
+
 	
-	inicio();
+//	inicio();
 
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
-//	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle); // tarea q se encarga de leer y enviar
-	xTaskCreate(&TareaLuces, "Prender y apagar", 4096, NULL, 5, &luces_task_handle); // tarea q se encarga de leer y enviar
-//	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
+	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
+	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
+//	xTaskCreate(&TareaLuces, "Prender y apagar", 4096, NULL, 5, &luces_task_handle); // tarea q se encarga de leer y enviar
+	TimerStart(timer_tareas.timer);
 
-//	TimerStart(timer_mediciones.timer);
-//	TimerStart(timer_notificacion.timer);
 }
 /*==================[end of file]============================================*/
