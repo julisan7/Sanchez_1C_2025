@@ -34,10 +34,11 @@
  * | 28/05/2025 | Se esquematizan las tareas ventanas y luces    |
  * | 30/05/2025 | Implementacion del motor servo, funciona       |
  * | 06/06/2025 | Creacion de la tarea medir, no funciona        |
- * | 10/06/2025 | Cambios en la tarea medir y en la tarea lucez, |
+ * | 10/06/2025 | Cambios en la tarea medir y en la tarea luces, |
  * | 			| ambas compilan y flashean de forma correcta, 	 |
  * | 			| pero con problemas de logica. Ver si añadiendo |
  * | 			| el servo esto se arregla (igual reveer medir)  |
+ * | 13/06/2025 | Se implementa la funcion de inicio			 |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -58,13 +59,36 @@
 
 #include "timer_mcu.h" //despues lo tengo q borrar
 
+#include"rtc.h"//para la hora actual
+
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-bool abrir_ventanas = 1;	  // 1 para abrir, 0 para cerrar
+bool abrir_ventanas = 0;	  // 1 para abrir, 0 para cerrar
 bool prender_luces = 0; // 1 para prender, 0 para apagar
 uint16_t luz_interior=0;
 uint16_t luz_exterior=0;
+
+bool prender_sistema=0; 
+
+uint8_t hora_actual;
+uint8_t minutos_actual;
+uint8_t hora_apagado;
+uint8_t minutos_apagado;
+
+/*	typedef struct {
+   uint16_t year;	    
+   uint8_t  month;      
+   uint8_t  mday;	    
+   uint8_t  wday;	   
+   uint8_t  hour;	   
+   uint8_t  min;	   
+   uint8_t  sec;	   
+} rtc_t;
+*/
+
+rtc_t actual; //por que me tira error?
+rtc_t apagado;
 
 /**
  * @def iluminacion_ideal
@@ -232,7 +256,35 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 	}
 }
 */
+/**
+ * @fn static void inicio(void *pvParameter)
+ * @brief Funcion que determina las horas de encendido y apagado
+ * @param [in]
+ * @return
+ */
+static void inicio(){
+	uint16_t bytes_de_lectura=2;//2?
 
+	//tambien le hago ingresar el mes y el año?
+	UartSendString(UART_PC, "Hola. Por favor ingrese la hora actual (hh): ");
+	UartReadBuffer(UART_PC,&actual->hour, bytes_de_lectura);
+	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
+	UartReadBuffer(UART_PC,&actual->min, bytes_de_lectura);
+	UartSendString(UART_PC, "\r\nPor favor ingrese la hora a la cual debe apagarse el sistema (hh): ");
+	UartReadBuffer(UART_PC,&apagado->hour, bytes_de_lectura);
+	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
+	UartReadBuffer(UART_PC,&apagado->min, bytes_de_lectura);
+	//como uso el rtc_mcu?
+	RtcConfig(&actual);
+	//RtcRead(&actual); cuando actual == apagado, se apaga (como lo implemento?)
+	UartSendString(UART_PC, "\r\nSiendo las: ");//por ahi esto mejor no ponerlo asi no me complico
+	//hora ingresada
+	UartSendString(UART_PC, "\r\nEl sistema se apagara en: ");
+	//hacer la cuenta
+	UartSendString(UART_PC, " horas. ");
+	prender_sistema=1;// preguntar si esto puede ir en los while(true)
+
+}
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
@@ -282,6 +334,8 @@ void app_main(void)
 //	UartInit(&my_uart);
 //	TimerInit(&timer_mediciones); // Inicializa el timer A
 //	TimerInit(&timer_notificacion); // Inicializa el timer B
+	
+	inicio();
 
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 //	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle); // tarea q se encarga de leer y enviar

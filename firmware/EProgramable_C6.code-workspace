@@ -113,7 +113,8 @@
             "cstdint": "c",
             "servo_sg90.h": "c",
             "stdio.h": "c",
-            "random": "c"
+            "random": "c",
+            "rtc_mcu.h": "c"
         },
     },
     "tasks": {
