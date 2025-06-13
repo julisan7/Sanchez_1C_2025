@@ -59,7 +59,7 @@
 
 #include "timer_mcu.h" //despues lo tengo q borrar
 
-#include"rtc.h"//para la hora actual
+#include "rtc_mcu.h"//para la hora actual
 
 /*==================[macros and definitions]=================================*/
 
@@ -70,11 +70,6 @@ static uint16_t luz_interior;
 static uint16_t luz_exterior=0;
 
 bool prender_sistema=0; 
-
-uint8_t hora_actual;
-uint8_t minutos_actual;
-uint8_t hora_apagado;
-uint8_t minutos_apagado;
 
 /**
  * @def iluminacion_ideal
@@ -93,7 +88,7 @@ TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventana
 TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la uart
 
 //ver por que esto no anda ¿?
-/*
+
 rtc_t actual={
 	.year=2025,
 	.month=06,
@@ -103,8 +98,8 @@ rtc_t actual={
     .min=0,	   
     .sec=5,
 };
-*/
-/*
+
+
 rtc_t apagado={
 	.year=2025,
 	.month=06,
@@ -113,7 +108,7 @@ rtc_t apagado={
     .hour=0,
     .min=0,
     .sec=5	
-}; */
+};
 
 /*==================[internal functions declaration]=========================*/
 
@@ -143,7 +138,7 @@ static void TareaMedir (void *pvParameter)
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
 		AnalogInputReadSingle(CH2,&luz_interior);
-		
+//---------------VER SI ESTO FUNCIONA EN LA UART-----------------------		
 		UartSendString(UART_PC, "Luz en el interior: ");
 		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
 		UartSendString(UART_PC, "\r\n");
@@ -216,8 +211,11 @@ static void TareaVentanas(void *pvParameter)
 static void TareaNotificarUART(void *pvParameter){ //UART
 	while (true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+//-----------------------ESTO ES LO QUE DEBERIA ANDAR---------------------------		
 		//UartSendString(UART_PC, "Luz en el interior: "); 
 		//UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10)); // esto me tira 0
+		UartSendString(UART_PC, "Estatus a las: ");
+		//hora y minutos
 		if(ventanas_abiertas==1){
 			UartSendString(UART_PC, "Las ventanas estan abiertas. \r\n");
 		}
@@ -234,30 +232,36 @@ static void TareaNotificarUART(void *pvParameter){ //UART
  * @param [in]
  * @return
  */
-/*
+
 static void inicio(){
+
 	uint16_t bytes_de_lectura=2;
 
-	UartSendString(UART_PC, "Hola. Por favor ingrese la hora actual (hh): ");
-	UartReadBuffer(UART_PC,&actual->hour, bytes_de_lectura);
+	UartSendString(UART_PC, "Hola. Por favor ingrese la hora actual (hh): \r\n");
+	UartReadBuffer(UART_PC,&actual.hour, bytes_de_lectura);
 	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
-	UartReadBuffer(UART_PC,&actual->min, bytes_de_lectura);
+	UartReadBuffer(UART_PC, &actual.min, bytes_de_lectura);
 	UartSendString(UART_PC, "\r\nPor favor ingrese la hora a la cual debe apagarse el sistema (hh): ");
-	UartReadBuffer(UART_PC,&apagado->hour, bytes_de_lectura);
+	UartReadBuffer(UART_PC, &apagado.hour, bytes_de_lectura);
 	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
-	UartReadBuffer(UART_PC,&apagado->min, bytes_de_lectura);
-	//como uso el rtc_mcu?
+	UartReadBuffer(UART_PC, &apagado.min, bytes_de_lectura);
+
 	RtcConfig(&actual);
+
 	//RtcRead(&actual); cuando actual == apagado, se apaga (como lo implemento?)
-	UartSendString(UART_PC, "\r\nSiendo las: ");//por ahi esto mejor no ponerlo asi no me complico
-	//hora ingresada
-	UartSendString(UART_PC, "\r\nEl sistema se apagara en: ");
-	//hacer la cuenta
-	UartSendString(UART_PC, " horas. ");
+	uint8_t hora=apagado.hour-actual.hour;
+	uint8_t minutos=apagado.min-actual.min;
+
+	UartSendString(UART_PC, "El sistema se apagara en: ");
+	UartSendString(UART_PC, (char *)UartItoa(hora, 10));
+	UartSendString(UART_PC, " horas, ");
+	UartSendString(UART_PC, (char *)UartItoa(minutos, 10));
+	UartSendString(UART_PC, " minutos. \r\n");
+
 	prender_sistema=1;// preguntar si esto puede ir en los while(true)
 
 }
-*/
+
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
@@ -290,29 +294,19 @@ void app_main(void)
 		.func_p = NULL,
 		.param_p = NULL
 	};
-/*
-	rtc_t actual = {
-		.year = 2025,
-		.month = 06,
-		.mday = 23,
-   		.wday = 1,
-    	.hour = 0,	
-		.min = 0,	   
-		.sec = 5,
-    }; 
-*/
+
 	AnalogInputInit(&canal_2);
 	AnalogInputInit(&canal_3);
 
-	GPIOInit(GPIO_9, GPIO_OUTPUT); //salida para el led **ACA MARCA UN PIQUITO RJO :(
+	GPIOInit(GPIO_9, GPIO_OUTPUT); 
 
-	ServoInit(SERVO_0, GPIO_1); // inicializacion ser servo, como puedo conectar hasta 4 servos pongo el primero y uso la salida analogica q da pwm
+	ServoInit(SERVO_0, GPIO_1);
 
 	UartInit(&my_uart);
-	TimerInit(&timer_tareas); // Inicializa el timer A
 
-	
-//	inicio();
+	TimerInit(&timer_tareas);
+
+	inicio();
 
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
