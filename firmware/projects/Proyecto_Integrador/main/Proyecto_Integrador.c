@@ -37,8 +37,13 @@
  * | 10/06/2025 | Cambios en la tarea medir y en la tarea luces, |
  * | 			| ambas compilan y flashean de forma correcta, 	 |
  * | 			| pero con problemas de logica. Ver si añadiendo |
- * | 			| el servo esto se arregla (igual reveer medir)  |
- * | 13/06/2025 | Se implementa la funcion de inicio			 |
+ * | 			| el servo esto se arregla						 |
+ * | 13/06/2025 | El programa funciona en general, hay que ver el|
+ * |			| probllema descripto en la tarea de la uart	 |<----------
+ * | 15/06/2025 | Se agrega la tarea final, consultar si la 	 |
+ * |			| logica los los whiles esta bien (y si puedo 	 |<----------
+ * |			| hacer un vtaskdelay en finalizar en lugar de 	 |	
+ * |			| agregarle un timer)				 			 |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *
@@ -69,7 +74,9 @@ static bool prender_luces = 0; // 1 para prender, 0 para apagar
 static uint16_t luz_interior;
 static uint16_t luz_exterior=0;
 
-bool prender_sistema=0; 
+bool prender_sistema=false; 
+
+static bool finalizar=false;
 
 /**
  * @def iluminacion_ideal
@@ -86,8 +93,7 @@ bool iluminacion_optima;
 TaskHandle_t medir_task_handle = NULL;		// tarea que mide
 TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventanas
 TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la uart
-
-//ver por que esto no anda ¿?
+TaskHandle_t verificar_horario_task_handle = NULL; //tarea que llama a la funcion finali
 
 rtc_t actual={
 	.year=2025,
@@ -134,7 +140,7 @@ void FuncTimer3seg(void *param)
  */
 static void TareaMedir (void *pvParameter)
 {
-	while(true){
+	while(true){//prender_sistema==true
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
 		AnalogInputReadSingle(CH2,&luz_interior);
@@ -184,7 +190,7 @@ static void TareaMedir (void *pvParameter)
 
 static void TareaVentanas(void *pvParameter)
 {	
-	while (true)
+	while (true)//prender_sistema==true
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); 
 		
@@ -209,11 +215,12 @@ static void TareaVentanas(void *pvParameter)
  * @return
  */
 static void TareaNotificarUART(void *pvParameter){ //UART
-	while (true){
+	while (true){ //prender_sistema==true
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 //-----------------------ESTO ES LO QUE DEBERIA ANDAR---------------------------		
 		//UartSendString(UART_PC, "Luz en el interior: "); 
 		//UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10)); // esto me tira 0
+
 		UartSendString(UART_PC, "Estatus a las: ");
 		//hora y minutos
 		if(ventanas_abiertas==1){
@@ -227,7 +234,7 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 	}
 }
 /**
- * @fn static void inicio(void *pvParameter)
+ * @fn static void inicio()
  * @brief Funcion que determina las horas de encendido y apagado
  * @param [in]
  * @return
@@ -236,32 +243,53 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 static void inicio(){
 
 	uint16_t bytes_de_lectura=2;
-
-	UartSendString(UART_PC, "Hola. Por favor ingrese la hora actual (hh): \r\n");
-	UartReadBuffer(UART_PC,&actual.hour, bytes_de_lectura);
-	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
-	UartReadBuffer(UART_PC, &actual.min, bytes_de_lectura);
-	UartSendString(UART_PC, "\r\nPor favor ingrese la hora a la cual debe apagarse el sistema (hh): ");
-	UartReadBuffer(UART_PC, &apagado.hour, bytes_de_lectura);
-	UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
-	UartReadBuffer(UART_PC, &apagado.min, bytes_de_lectura);
-
-	RtcConfig(&actual);
-
-	//RtcRead(&actual); cuando actual == apagado, se apaga (como lo implemento?)
-	uint8_t hora=apagado.hour-actual.hour;
-	uint8_t minutos=apagado.min-actual.min;
-
-	UartSendString(UART_PC, "El sistema se apagara en: ");
-	UartSendString(UART_PC, (char *)UartItoa(hora, 10));
-	UartSendString(UART_PC, " horas, ");
-	UartSendString(UART_PC, (char *)UartItoa(minutos, 10));
-	UartSendString(UART_PC, " minutos. \r\n");
-
-	prender_sistema=1;// preguntar si esto puede ir en los while(true)
+	bool horario_valido=false;
+	while(horario_valido==false){
+		UartSendString(UART_PC, "Hola. Por favor ingrese la hora actual (hh): \r\n");
+		UartReadBuffer(UART_PC,&actual.hour, bytes_de_lectura);
+		UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
+		UartReadBuffer(UART_PC, &actual.min, bytes_de_lectura);
+		UartSendString(UART_PC, "\r\nPor favor ingrese la hora a la cual debe apagarse el sistema (hh): ");
+		UartReadBuffer(UART_PC, &apagado.hour, bytes_de_lectura);
+		UartSendString(UART_PC, "\r\nPor favor ingrese los minutos (mm): ");
+		UartReadBuffer(UART_PC, &apagado.min, bytes_de_lectura);
+	
+		horario_valido=RtcConfig(&actual);
+	}
+	
+	prender_sistema=true;// preguntar si esto puede ir en los while(true)
 
 }
+/**
+ * @fn static void final(void *pvParameter)
+ * @brief Tarea que finaliza el programa cuando se cumple el horario 
+ * @param [in]
+ * @return
+ */
+static bool final(void *pvParameter){
+	while (prender_sistema==true){
 
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //vTaskDelay(60*1000 / portTICK_PERIOD_MS); esta mal si lo hago con un vtaskdelay?
+
+		RtcRead(&actual);
+		if(actual.hour==apagado.hour){
+			if(actual.min==apagado.min){
+				UartSendString(UART_PC, "Son las: \r\n");
+				UartSendString(UART_PC, (char *)UartItoa(apagado.hour, 10));
+				UartSendString(UART_PC, " : ");
+				UartSendString(UART_PC, (char *)UartItoa(apagado.min, 10));
+				UartSendString(UART_PC, " hs.\r\n");
+				UartSendString(UART_PC, "Tiempo cumplido.\r\n");
+				UartSendString(UART_PC, "{Apagando}.\r\n");
+				prender_sistema=false;
+				finalizar=true;
+			}
+
+		}
+	}
+	return finalizar;
+	
+}
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
@@ -311,6 +339,8 @@ void app_main(void)
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
 	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
+	xTaskCreate(&final, "Horario de cierre", 2048, NULL, 5, &verificar_horario_task_handle);
+
 	TimerStart(timer_tareas.timer);
 
 }
