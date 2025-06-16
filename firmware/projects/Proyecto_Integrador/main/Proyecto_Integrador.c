@@ -17,13 +17,21 @@
  * | VCC (rojo)	 	   | 	5 V 	|
  * 
  * 
- * |    LDR            |   ESP32   	| 5v
- * |:-----------------:|:-----------| 1k
- * | Luz interior	   |   GPIO 2  	| Aca deberia ir el cable de la entrada pq mido caida de tensionLDR
- * | Luz exterior	   |   GPIO 3  	| LDR
- * | RED LED           |   GPIO 9  	| GND  (esto en ambos casos, dejo la proto armada en el casillero) 
- * 									   
+ * |    LDR            |   ESP32   	|
+ * |:-----------------:|:-----------|
+ * | Luz interior	   |   GPIO 2  	|
+ * | Luz exterior	   |   GPIO 3  	|
+ * | RED LED           |   GPIO 9  	| 
+ * 
+ * 
+ * Esquema de conectividad en la protoboard de las LDR:
+ *  ___				___					  _____		   ___
+ * |   |___________|   |_________________|	   |______|	  |
+ * |5 v|           |1 k|		|		 | LDR |	  |GND|
+ * |___|		   |___|	 GPIO 2/3	 |_____|	  |___|
  *
+ * 
+ * 
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
@@ -88,7 +96,8 @@ uint8_t angulo_servo;		  // angulo que se mueve el servo
 
 bool iluminacion_optima;
 
-#define CONFIG_TAREAS_PERIOD 3*1000*1000 //Periodo para las meidiciones
+#define CONFIG_TAREAS_PERIOD 3*1000*1000 //Periodo para las mediciones
+#define CONFIG_FINAL_PERIOD 60*1000*1000 // un minuto 
 
 TaskHandle_t medir_task_handle = NULL;		// tarea que mide
 TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventanas
@@ -260,6 +269,9 @@ static void inicio(){
 	prender_sistema=true;// preguntar si esto puede ir en los while(true)
 
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------------------
 /**
  * @fn static void final(void *pvParameter)
  * @brief Tarea que finaliza el programa cuando se cumple el horario 
@@ -290,30 +302,42 @@ static bool final(void *pvParameter){
 	return finalizar;
 	
 }
+//-------------------------------------------------------------------------------------------------------------------------------------
+
+
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
 	timer_config_t timer_tareas = {
-	.timer = TIMER_A,
-	.period = CONFIG_TAREAS_PERIOD,
-	.func_p = FuncTimer3seg,
-	.param_p = NULL
+		.timer = TIMER_A,
+		.period = CONFIG_TAREAS_PERIOD,
+		.func_p = FuncTimer3seg,
+		.param_p = NULL
 	};
 
+//---------------------------------
+	timer_config_t timer_final = {
+		.timer = TIMER_B,
+		.period = CONFIG_FINAL_PERIOD,
+		.func_p = final,
+		.param_p = NULL
+	};
+
+//----------------------------------
 	analog_input_config_t canal_2 ={
-	.input = CH2,		//canal2
-	.mode = ADC_SINGLE, //single porque solo va por interrupciones
-	.func_p = NULL,		// solo para modo continuo
-	.param_p = NULL,	// solo para modo continuo
-	.sample_frec = 0	//no lo vamos a usar
+		.input = CH2,		//canal2
+		.mode = ADC_SINGLE, //single porque solo va por interrupciones
+		.func_p = NULL,		// solo para modo continuo
+		.param_p = NULL,	// solo para modo continuo
+		.sample_frec = 0	//no lo vamos a usar
 	};
 
 	analog_input_config_t canal_3 ={
-	.input = CH3,		//canal3
-	.mode = ADC_SINGLE, //single porque solo va por interrupciones
-	.func_p = NULL,		// solo para modo continuo
-	.param_p = NULL,	// solo para modo continuo
-	.sample_frec = 0	//no lo vamos a usar
+		.input = CH3,		//canal3
+		.mode = ADC_SINGLE, //single porque solo va por interrupciones
+		.func_p = NULL,		// solo para modo continuo
+		.param_p = NULL,	// solo para modo continuo
+		.sample_frec = 0	//no lo vamos a usar
 	};
 
 	serial_config_t my_uart = {
@@ -333,15 +357,22 @@ void app_main(void)
 	UartInit(&my_uart);
 
 	TimerInit(&timer_tareas);
+	TimerInit(&timer_final);
 
 	inicio();
 
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
 	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
+
+//-------------------------------------------------------------------------------------------
 	xTaskCreate(&final, "Horario de cierre", 2048, NULL, 5, &verificar_horario_task_handle);
+//-------------------------------------------------------------------------------------------
 
 	TimerStart(timer_tareas.timer);
 
+//--------------------------------
+	TimerStart(timer_final.timer);
+//--------------------------------
 }
 /*==================[end of file]============================================*/
