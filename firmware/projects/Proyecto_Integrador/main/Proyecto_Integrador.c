@@ -84,7 +84,7 @@ static uint16_t luz_exterior=0;
 
 bool prender_sistema=false; 
 
-static bool finalizar=false;
+//static bool finalizar=false;
 
 /**
  * @def iluminacion_ideal
@@ -102,15 +102,15 @@ bool iluminacion_optima;
 TaskHandle_t medir_task_handle = NULL;		// tarea que mide
 TaskHandle_t ventanas_task_handle = NULL;	// tarea que abre y cierra las ventanas
 TaskHandle_t notificar_task_handle = NULL; // tarea que lee y envia datos de la uart
-TaskHandle_t verificar_horario_task_handle = NULL; //tarea que llama a la funcion finali
+//TaskHandle_t verificar_horario_task_handle = NULL; //tarea que llama a la funcion finali
 
 rtc_t actual={
 	.year=2025,
 	.month=06,
 	.mday=23,
    	.wday=1,
-    .hour=0,	
-    .min=0,	   
+    .hour=8,	
+    .min=00,	   
     .sec=5,
 };
 
@@ -120,8 +120,8 @@ rtc_t apagado={
 	.month=06,
     .mday=23,
    	.wday=1,
-    .hour=0,
-    .min=0,
+    .hour=20,
+    .min=00,
     .sec=5	
 };
 
@@ -154,9 +154,9 @@ static void TareaMedir (void *pvParameter)
 
 		AnalogInputReadSingle(CH2,&luz_interior);
 //---------------VER SI ESTO FUNCIONA EN LA UART-----------------------		
-		UartSendString(UART_PC, "Luz en el interior: ");
-		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
-		UartSendString(UART_PC, "\r\n");
+	//	UartSendString(UART_PC, "Luz en el interior: ");
+	//	UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
+	//	UartSendString(UART_PC, "\r\n");
 
 		AnalogInputReadSingle(CH3,&luz_exterior);
 		if (ventanas_abiertas==1){
@@ -227,11 +227,14 @@ static void TareaNotificarUART(void *pvParameter){ //UART
 	while (true){ //prender_sistema==true
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 //-----------------------ESTO ES LO QUE DEBERIA ANDAR---------------------------		
-		//UartSendString(UART_PC, "Luz en el interior: "); 
-		//UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10)); // esto me tira 0
+		UartSendString(UART_PC, "Luz en el interior: "); 
+		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10)); // esto me tira 0
 
 		UartSendString(UART_PC, "Estatus a las: ");
 		//hora y minutos
+		UartSendString(UART_PC, (char *)UartItoa(actual.hour, 10));
+		UartSendString(UART_PC, " : ");
+		UartSendString(UART_PC, (char *)UartItoa(actual.min, 10));
 		if(ventanas_abiertas==1){
 			UartSendString(UART_PC, "Las ventanas estan abiertas. \r\n");
 		}
@@ -248,7 +251,7 @@ static void TareaNotificarUART(void *pvParameter){ //UART
  * @param [in]
  * @return
  */
-
+/*
 static void inicio(){
 
 	uint16_t bytes_de_lectura=2;
@@ -269,7 +272,7 @@ static void inicio(){
 	prender_sistema=true;// preguntar si esto puede ir en los while(true)
 
 }
-
+*/
 
 //----------------------------------------------------------------------------------------------------------------------------------
 /**
@@ -278,6 +281,7 @@ static void inicio(){
  * @param [in]
  * @return
  */
+/*
 static bool final(void *pvParameter){
 	while (prender_sistema==true){
 
@@ -302,6 +306,7 @@ static bool final(void *pvParameter){
 	return finalizar;
 	
 }
+*/
 //-------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -315,7 +320,7 @@ void app_main(void)
 		.param_p = NULL
 	};
 
-//---------------------------------
+/*---------------------------------
 	timer_config_t timer_final = {
 		.timer = TIMER_B,
 		.period = CONFIG_FINAL_PERIOD,
@@ -323,6 +328,7 @@ void app_main(void)
 		.param_p = NULL
 	};
 
+	*/
 //----------------------------------
 	analog_input_config_t canal_2 ={
 		.input = CH2,		//canal2
@@ -357,22 +363,22 @@ void app_main(void)
 	UartInit(&my_uart);
 
 	TimerInit(&timer_tareas);
-	TimerInit(&timer_final);
+//	TimerInit(&timer_final);
 
-	inicio();
+//	inicio();
 
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
 	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
 
 //-------------------------------------------------------------------------------------------
-	xTaskCreate(&final, "Horario de cierre", 2048, NULL, 5, &verificar_horario_task_handle);
+//	xTaskCreate(&final, "Horario de cierre", 2048, NULL, 5, &verificar_horario_task_handle);
 //-------------------------------------------------------------------------------------------
 
 	TimerStart(timer_tareas.timer);
 
 //--------------------------------
-	TimerStart(timer_final.timer);
+//	TimerStart(timer_final.timer);
 //--------------------------------
 }
 /*==================[end of file]============================================*/
