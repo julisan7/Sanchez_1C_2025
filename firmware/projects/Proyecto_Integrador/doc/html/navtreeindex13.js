@@ -1,7 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"hc__sr04_8c.html#a5e52844206c91ee47dcdf1697595b43a":[3,0,0,0,1,1,3,3],
-"hc__sr04_8c.html#aa6532a029eb01783785bf19751d1252d":[3,0,0,0,1,1,3,2],
 "hc__sr04_8c_source.html":[3,0,0,0,1,1,3],
 "hc__sr04_8h.html":[3,0,0,0,1,0,3],
 "hc__sr04_8h_source.html":[3,0,0,0,1,0,3],
@@ -249,5 +247,7 @@ var NAVTREEINDEX13 =
 "projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#a4b0efeb7a5d59313986b3a0390f050f6":[3,0,0,1,0,0,0,0,0,1,0,17],
 "projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#a59647e99d304ed33b15cb284c27ed391":[3,0,0,1,0,0,0,0,0,1,0,16],
 "projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#a81dee0709ded976b2e0319239f72d174":[3,0,0,1,0,0,0,0,0,1,0,2],
-"projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#aa52ec6104623a66734cc5d5d28733bed":[3,0,0,1,0,0,0,0,0,1,0,7]
+"projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#aa52ec6104623a66734cc5d5d28733bed":[3,0,0,1,0,0,0,0,0,1,0,7],
+"projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#aba35d0d200deaeb06aee95ca297acb28":[3,0,0,1,0,0,0,0,0,1,0,1],
+"projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#ad1280362da42492bbc11aa78cbf776ad":[3,0,0,1,0,0,0,0,0,1,0,10]
 };

@@ -53,21 +53,21 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_proyecto___integrador_8c.html",
-"bootloader_2config_2sdkconfig_8h.html#a29743712a56915cbbc5a3d34b434e5f3",
-"bootloader_2config_2sdkconfig_8h.html#a8917471b82553c5fb0d008c965f71ac8",
-"bootloader_2config_2sdkconfig_8h.html#aef9023bf17a63da66fa3f5a67805c02a",
-"config_2sdkconfig_8h.html#a336706d7e5ca94770ac4aa3709c49040",
-"config_2sdkconfig_8h.html#a76693d9ed40ec810fcac929a69c82504",
-"config_2sdkconfig_8h.html#ab4b68c27ed3005b187aff51ec73f8847",
-"config_2sdkconfig_8h.html#af39b7c8d0f98a92ee7164759f40ac781",
-"globals_v.html",
-"group___b_u_z_z_e_r.html#ga7943ad2d66e53367906e04e8af1c086a",
-"group___i_l_i9341.html#ga371e40bd6e120c18f7fff4a5a0f292b2",
-"group___m_p_u6050.html#ga4fe21728b1fd788f207cd4fe26288a95",
-"group___m_p_u6050.html#gac0c1d79d434f1405c3fae4053ae19ac2",
-"hc__sr04_8c.html#a5e52844206c91ee47dcdf1697595b43a",
-"projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#aba35d0d200deaeb06aee95ca297acb28",
-"uart__mcu_8c.html#a9ae4715bc5b76649b1f05ea98df67125"
+"bootloader_2config_2sdkconfig_8h.html#a2a628f1bfc6b278cccbab8cbd79082a7",
+"bootloader_2config_2sdkconfig_8h.html#a8abd6a22f9bf287b392ed78c7dde294e",
+"bootloader_2config_2sdkconfig_8h.html#af05c94999136ff36dcbe5769dd361171",
+"config_2sdkconfig_8h.html#a33f903bb0af493e4f7ce7fe425b39c4e",
+"config_2sdkconfig_8h.html#a769ac47c6f883aa388836b5375e29826",
+"config_2sdkconfig_8h.html#ab4f586773b6baa746cba5309b7cb48c7",
+"config_2sdkconfig_8h.html#af3b26afaec909f9d1f524c81c3f3283d",
+"globals_vars.html",
+"group___b_u_z_z_e_r.html#ga8086c9cb19cdacd01d2f0ffde5885f8b",
+"group___i_l_i9341.html#ga46360a506ec04c0ca618ee229bdad248",
+"group___m_p_u6050.html#ga50961409221f6d3716342de8be7bc392",
+"group___m_p_u6050.html#gac1940478f064230ee503daba0ba2f181",
+"hc__sr04_8c_source.html",
+"projects_2_proyecto___integrador_2build_2bootloader_2_c_make_files_23_830_82_2_compiler_id_c_x_x95574dec912d9a44860aae7a85dee3ca.html#adbc5372f40838899018fadbc89bd588b",
+"uart__mcu_8c.html#ac7c92d22ddc5bfc3c9aa3da970c126e9"
 ];
 
 var SYNCONMSG = 'pulsar para deshabilitar sincronización';

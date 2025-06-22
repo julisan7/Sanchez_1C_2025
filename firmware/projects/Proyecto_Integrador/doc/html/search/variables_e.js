@@ -14,14 +14,13 @@ var searchData=
   ['pixel_5fformat_5fset_11',['pixel_format_set',['../ili9341_8c.html#a100d66d7e8beee36f57806d288f8af96',1,'ili9341.c']]],
   ['port_12',['port',['../structserial__config__t.html#a27067c816e8c5402c7be0da9780678b0',1,'serial_config_t']]],
   ['pos_5fgamma_13',['pos_gamma',['../ili9341_8c.html#ae9f7984c806b71627776323c6d7e642a',1,'ili9341.c']]],
-  ['prender_5fsistema_14',['prender_sistema',['../_proyecto___integrador_8c.html#a45aef3fbc66cc672fe704db91b4f7507',1,'Proyecto_Integrador.c']]],
-  ['property_15',['property',['../structgatts__profile__inst.html#a192436b0a8681b65cff06641c7ae118e',1,'gatts_profile_inst']]],
-  ['proto_5fmode_16',['proto_mode',['../structhidd__inst__t.html#a952a3c195acc8c36d644a05851803e26',1,'hidd_inst_t']]],
-  ['pull_17',['pull',['../structdigital__io__t.html#aacb6eba5525d04b3d9be202365c49c75',1,'digital_io_t']]],
-  ['pump_5fratio_5fctrl_18',['pump_ratio_ctrl',['../ili9341_8c.html#a57cfbbe62f146bb9f1bf6493191053dd',1,'ili9341.c']]],
-  ['pwr_5fctrl1_19',['pwr_ctrl1',['../ili9341_8c.html#afda58a19fb0b537ef8043dd8ff5d684a',1,'ili9341.c']]],
-  ['pwr_5fctrl2_20',['pwr_ctrl2',['../ili9341_8c.html#a564f88fe64e9af6e6cac92d11b68a247',1,'ili9341.c']]],
-  ['pwr_5fctrl_5fa_21',['pwr_ctrl_a',['../ili9341_8c.html#a416313b8ca5aecccc037d6e3458677db',1,'ili9341.c']]],
-  ['pwr_5fctrl_5fb_22',['pwr_ctrl_b',['../ili9341_8c.html#a438c9eddc4798e47d7c55f6301e1c6cc',1,'ili9341.c']]],
-  ['pwr_5fon_5fctrl_23',['pwr_on_ctrl',['../ili9341_8c.html#a50c4cc503302476f9c68c328d19f5e30',1,'ili9341.c']]]
+  ['property_14',['property',['../structgatts__profile__inst.html#a192436b0a8681b65cff06641c7ae118e',1,'gatts_profile_inst']]],
+  ['proto_5fmode_15',['proto_mode',['../structhidd__inst__t.html#a952a3c195acc8c36d644a05851803e26',1,'hidd_inst_t']]],
+  ['pull_16',['pull',['../structdigital__io__t.html#aacb6eba5525d04b3d9be202365c49c75',1,'digital_io_t']]],
+  ['pump_5fratio_5fctrl_17',['pump_ratio_ctrl',['../ili9341_8c.html#a57cfbbe62f146bb9f1bf6493191053dd',1,'ili9341.c']]],
+  ['pwr_5fctrl1_18',['pwr_ctrl1',['../ili9341_8c.html#afda58a19fb0b537ef8043dd8ff5d684a',1,'ili9341.c']]],
+  ['pwr_5fctrl2_19',['pwr_ctrl2',['../ili9341_8c.html#a564f88fe64e9af6e6cac92d11b68a247',1,'ili9341.c']]],
+  ['pwr_5fctrl_5fa_20',['pwr_ctrl_a',['../ili9341_8c.html#a416313b8ca5aecccc037d6e3458677db',1,'ili9341.c']]],
+  ['pwr_5fctrl_5fb_21',['pwr_ctrl_b',['../ili9341_8c.html#a438c9eddc4798e47d7c55f6301e1c6cc',1,'ili9341.c']]],
+  ['pwr_5fon_5fctrl_22',['pwr_on_ctrl',['../ili9341_8c.html#a50c4cc503302476f9c68c328d19f5e30',1,'ili9341.c']]]
 ];

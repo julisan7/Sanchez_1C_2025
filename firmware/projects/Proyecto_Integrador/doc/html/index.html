@@ -34,7 +34,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fiuner.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Protecto Integrador<span id="projectnumber">&#160;1.0</span>
+   <div id="projectname">Protecto Integrador<span id="projectnumber">&#160;2.0</span>
    </div>
   </td>
     <td>        <div id="MSearchBox" class="MSearchBoxInactive">
@@ -123,7 +123,18 @@ Hardware Connection</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyCenter">VCC (rojo)   </td><td class="markdownTableBodyLeft">5 V   </td></tr>
 </table>
-<p>| LDR | ESP32 | 5v |:--------------&mdash;:|:--------&mdash;| 1k | Luz interior | GPIO 2 | Aca deberia ir el cable de la entrada pq mido caida de tensionLDR | Luz exterior | GPIO 3 | LDR | RED LED | GPIO 9 | GND (esto en ambos casos, dejo la proto armada en el casillero)</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadCenter">LDR   </th><th class="markdownTableHeadLeft">ESP32    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">Luz interior   </td><td class="markdownTableBodyLeft">GPIO 2    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">Luz exterior   </td><td class="markdownTableBodyLeft">GPIO 3    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">RED LED   </td><td class="markdownTableBodyLeft">GPIO 9   </td></tr>
+</table>
+<p>Esquema de conectividad en la protoboard de las LDR: </p><hr  />
+<p> | |___________| |_________________| |______| | |5 v| |1 k| | | LDR | |GND| |___| |___| GPIO 2/3 |_____| |___|</p>
 <h1><a class="anchor" id="changelog"></a>
 Changelog</h1>
 <table class="markdownTable">
@@ -152,8 +163,7 @@ Changelog</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyCenter">13/06/2025   </td><td class="markdownTableBodyLeft">El programa funciona en general, hay que ver el   </td></tr>
 </table>
-<p>| | probllema descripto en la tarea de la uart |&lt;-------&mdash; | 15/06/2025 | Se agrega la tarea final, consultar si la | | | logica los los whiles esta bien (y si puedo |&lt;-------&mdash; | | hacer un vtaskdelay en finalizar en lugar de | <br  />
- | | agregarle un timer) |</p>
+<p>| | probllema descripto en la tarea de la uart |&lt;-------&mdash; | 15/06/2025 | Se agrega la tarea final, consultar si la | | | logica los los whiles esta bien (y si puedo |&lt;-------&mdash; | | hacer un vtaskdelay en finalizar en lugar de | | | agregarle un timer) |</p>
 <dl class="section author"><dt>Autor</dt><dd>Julieta Sanchez (<a href="#" onclick="location.href='mai'+'lto:'+'jul'+'ie'+'ta.'+'sa'+'nch'+'ez'+'@in'+'ge'+'nie'+'ri'+'a.u'+'ne'+'r.e'+'du'+'.ar'; return false;">julie<span class="obfuscator">.nosp@m.</span>ta.s<span class="obfuscator">.nosp@m.</span>anche<span class="obfuscator">.nosp@m.</span>z@in<span class="obfuscator">.nosp@m.</span>genie<span class="obfuscator">.nosp@m.</span>ria.<span class="obfuscator">.nosp@m.</span>uner.<span class="obfuscator">.nosp@m.</span>edu.<span class="obfuscator">.nosp@m.</span>ar</a>) </dd></dl>
 </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>

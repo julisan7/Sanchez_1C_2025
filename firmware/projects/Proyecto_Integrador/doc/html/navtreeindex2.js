@@ -1,7 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"bootloader_2config_2sdkconfig_8h.html#a8917471b82553c5fb0d008c965f71ac8":[3,0,0,1,0,0,0,1,0,620],
-"bootloader_2config_2sdkconfig_8h.html#a8a18d3df117917112b8b156edd62905b":[3,0,0,1,0,0,0,1,0,173],
 "bootloader_2config_2sdkconfig_8h.html#a8abd6a22f9bf287b392ed78c7dde294e":[3,0,0,1,0,0,0,1,0,453],
 "bootloader_2config_2sdkconfig_8h.html#a8b0fe61560926f007f97c2ccc7c63dff":[3,0,0,1,0,0,0,1,0,552],
 "bootloader_2config_2sdkconfig_8h.html#a8b6f6614038c0e626b2d084bfc11996a":[3,0,0,1,0,0,0,1,0,588],
@@ -249,5 +247,7 @@ var NAVTREEINDEX2 =
 "bootloader_2config_2sdkconfig_8h.html#aee46eaa04733ec71b3bee81966bdb144":[3,0,0,1,0,0,0,1,0,106],
 "bootloader_2config_2sdkconfig_8h.html#aeecdccdbbe12b6e3f810abd04007cabf":[3,0,0,1,0,0,0,1,0,297],
 "bootloader_2config_2sdkconfig_8h.html#aef3f965e1e92d1ed3b76fb33353e1492":[3,0,0,1,0,0,0,1,0,271],
-"bootloader_2config_2sdkconfig_8h.html#aef4a59f33692a4ee64a70771a5261a65":[3,0,0,1,0,0,0,1,0,120]
+"bootloader_2config_2sdkconfig_8h.html#aef4a59f33692a4ee64a70771a5261a65":[3,0,0,1,0,0,0,1,0,120],
+"bootloader_2config_2sdkconfig_8h.html#aef9023bf17a63da66fa3f5a67805c02a":[3,0,0,1,0,0,0,1,0,613],
+"bootloader_2config_2sdkconfig_8h.html#aeffcfdbbf98326125cdab72cfeed2573":[3,0,0,1,0,0,0,1,0,533]
 };

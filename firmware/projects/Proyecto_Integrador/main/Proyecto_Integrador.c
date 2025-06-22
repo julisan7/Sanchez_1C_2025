@@ -25,11 +25,9 @@
  *
  *
  * Esquema de conectividad en la protoboard de las LDR:
- *  ___				___					  _____		   ___
- * |   |___________|   |_________________|	   |______|	  |
- * |5 v|           |1 k|		|		 | LDR |	  |GND|
- * |___|		   |___|	 GPIO 2/3	 |_____|	  |___|
- *
+ * 
+ * |5 v|-----------|1 k|-------|------| LDR |-------|GND|
+ * 							GPIO 2/3
  *
  *
  * @section changelog Changelog
@@ -47,11 +45,12 @@
  * | 			| pero con problemas de logica. Ver si añadiendo |
  * | 			| el servo esto se arregla						 |
  * | 13/06/2025 | El programa funciona en general, hay que ver el|
- * |			| probllema descripto en la tarea de la uart	 |<----------
+ * |			| problema descripto en la tarea de la uart	 	 |
  * | 15/06/2025 | Se agrega la tarea final, consultar si la 	 |
- * |			| logica los los whiles esta bien (y si puedo 	 |<----------
+ * |			| logica los los whiles esta bien (y si puedo 	 |
  * |			| hacer un vtaskdelay en finalizar en lugar de 	 |
  * |			| agregarle un timer)				 			 |
+ * |17/06/2025	| El programa corre de manera correcta.			 |
  *
  * @author Julieta Sanchez (julieta.sanchez@ingenieria.uner.edu.ar)
  *

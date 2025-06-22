@@ -1,7 +1,5 @@
 var NAVTREEINDEX7 =
 {
-"config_2sdkconfig_8h.html#af39b7c8d0f98a92ee7164759f40ac781":[3,0,0,1,0,0,3,0,647],
-"config_2sdkconfig_8h.html#af3a01b936064f32de3fb768258aef880":[3,0,0,1,0,0,3,0,973],
 "config_2sdkconfig_8h.html#af3b26afaec909f9d1f524c81c3f3283d":[3,0,0,1,0,0,3,0,366],
 "config_2sdkconfig_8h.html#af4294bba7a50172c252f1e77511b6bb0":[3,0,0,1,0,0,3,0,390],
 "config_2sdkconfig_8h.html#af4d2145068215efc77966367ac2b79fa":[3,0,0,1,0,0,3,0,221],
@@ -249,5 +247,7 @@ var NAVTREEINDEX7 =
 "globals_s.html":[3,1,0,17],
 "globals_t.html":[3,1,0,18],
 "globals_type.html":[3,1,3],
-"globals_u.html":[3,1,0,19]
+"globals_u.html":[3,1,0,19],
+"globals_v.html":[3,1,0,20],
+"globals_vars.html":[3,1,2]
 };

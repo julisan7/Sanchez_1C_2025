@@ -1,19 +1,17 @@
 var NAVTREEINDEX0 =
 {
 "_proyecto___integrador_8c.html":[3,0,0,1,0,1,0],
-"_proyecto___integrador_8c.html#a2b0cb40d7a31ce7e8b3f906fd55df312":[3,0,0,1,0,1,0,8],
-"_proyecto___integrador_8c.html#a33c31160b32fa78a88e04655ea535410":[3,0,0,1,0,1,0,9],
-"_proyecto___integrador_8c.html#a34e351c9a3c886fb8baa0ecb2049662e":[3,0,0,1,0,1,0,3],
-"_proyecto___integrador_8c.html#a45aef3fbc66cc672fe704db91b4f7507":[3,0,0,1,0,1,0,10],
-"_proyecto___integrador_8c.html#a4c29c8c6ff2964cfa8e6c612de92e565":[3,0,0,1,0,1,0,5],
-"_proyecto___integrador_8c.html#a5072197d1a460a7ba0dbcd1beac2b4f5":[3,0,0,1,0,1,0,12],
-"_proyecto___integrador_8c.html#a577957fe5b79c9568880bb36c790781f":[3,0,0,1,0,1,0,4],
+"_proyecto___integrador_8c.html#a2b0cb40d7a31ce7e8b3f906fd55df312":[3,0,0,1,0,1,0,7],
+"_proyecto___integrador_8c.html#a33c31160b32fa78a88e04655ea535410":[3,0,0,1,0,1,0,8],
+"_proyecto___integrador_8c.html#a4c29c8c6ff2964cfa8e6c612de92e565":[3,0,0,1,0,1,0,4],
+"_proyecto___integrador_8c.html#a5072197d1a460a7ba0dbcd1beac2b4f5":[3,0,0,1,0,1,0,10],
+"_proyecto___integrador_8c.html#a577957fe5b79c9568880bb36c790781f":[3,0,0,1,0,1,0,3],
 "_proyecto___integrador_8c.html#a630544a7f0a2cc40d8a7fefab7e2fe70":[3,0,0,1,0,1,0,1],
 "_proyecto___integrador_8c.html#a8ba71e34be443cdc1de2db8ce52410b7":[3,0,0,1,0,1,0,2],
-"_proyecto___integrador_8c.html#aa28055345cf559b684ad80024d49865e":[3,0,0,1,0,1,0,6],
-"_proyecto___integrador_8c.html#aa92e2d26a031d8b4559b222cb7eebb2e":[3,0,0,1,0,1,0,11],
+"_proyecto___integrador_8c.html#aa28055345cf559b684ad80024d49865e":[3,0,0,1,0,1,0,5],
+"_proyecto___integrador_8c.html#aa92e2d26a031d8b4559b222cb7eebb2e":[3,0,0,1,0,1,0,9],
 "_proyecto___integrador_8c.html#ad2ec3d63f576f823ea57411b3fb34f86":[3,0,0,1,0,1,0,0],
-"_proyecto___integrador_8c.html#ae090efb2b234b16043e9c9d74f2965d5":[3,0,0,1,0,1,0,7],
+"_proyecto___integrador_8c.html#ae090efb2b234b16043e9c9d74f2965d5":[3,0,0,1,0,1,0,6],
 "_proyecto___integrador_8c_source.html":[3,0,0,1,0,1,0],
 "analog__io__mcu_8c.html":[3,0,0,0,2,1,0],
 "analog__io__mcu_8c.html#a011dd77da2406fbe9beab9a63e042af9":[3,0,0,0,2,1,0,0],
@@ -249,5 +247,7 @@ var NAVTREEINDEX0 =
 "bootloader_2config_2sdkconfig_8h.html#a281a8a32be17fbbd0e2d69ce3e769617":[3,0,0,1,0,0,0,1,0,537],
 "bootloader_2config_2sdkconfig_8h.html#a28687e74f70719c4ae0b9486d83f0ac4":[3,0,0,1,0,0,0,1,0,623],
 "bootloader_2config_2sdkconfig_8h.html#a28cf9b91aed90f65a9ce9ed334438462":[3,0,0,1,0,0,0,1,0,348],
-"bootloader_2config_2sdkconfig_8h.html#a28e791e5efffeaf728ca9c4aa2e70f75":[3,0,0,1,0,0,0,1,0,427]
+"bootloader_2config_2sdkconfig_8h.html#a28e791e5efffeaf728ca9c4aa2e70f75":[3,0,0,1,0,0,0,1,0,427],
+"bootloader_2config_2sdkconfig_8h.html#a29743712a56915cbbc5a3d34b434e5f3":[3,0,0,1,0,0,0,1,0,429],
+"bootloader_2config_2sdkconfig_8h.html#a2a51fb3305ccc056cbd4764f960f3808":[3,0,0,1,0,0,0,1,0,136]
 };
