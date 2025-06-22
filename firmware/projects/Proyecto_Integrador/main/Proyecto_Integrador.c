@@ -77,21 +77,51 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-static bool ventanas_abiertas = 0; // 1 para abrir, 0 para cerrar
-static bool prender_luces = 0;	   // 1 para prender, 0 para apagar
-static uint16_t luz_interior;
-static uint16_t luz_exterior = 0;
+/**
+ *  @var Ventanas_avbiertas
+ * @brief variable booleana que esta en 1 para las ventanas abiertas y en 0 para las ventanas cerradas
+ */
+static bool ventanas_abiertas = 0;
 
+/**
+ * @var prender_luces
+ * @brief variable booleana que esta en 1 para las luces prendidas y en 0 para las luces apagadas
+ */
+static bool prender_luces = 0;
+
+/**
+ *  @var luz_interior
+ * @brief variable que almacena la medicion de la luz interior
+ */
+static uint16_t luz_interior;
+/**
+ *  @var luz_exterior
+ * @brief variable que almacena la medicion de la luz exterior
+ */
+static uint16_t luz_exterior;
+
+/**
+ * @var finalizar
+ * @brief variable booleana que cambia a true cuando el horario se cumple y se debe finalizar el programa
+ */
 static bool finalizar = false;
 
 /**
- * @def iluminacion_ideal
+ * @var iluminacion_ideal
  * @brief Valor en mV con el cual se compara la iluminacion interior
  */
 uint16_t iluminacion_ideal = 1650; // Valor optimo con el cual se compara la medicion en mV
 
-uint8_t angulo_servo; // angulo que se mueve el servo
+/**
+ *  @var ansulo_servo
+ * @brief angulo que se mueve el servo
+ */
+uint8_t angulo_servo;
 
+/**
+ *  @var iluminacion optima
+ * @brief variable booleana que es true si la iluminacion es optima y false en el caso contrario
+ */
 bool iluminacion_optima;
 
 #define CONFIG_TAREAS_PERIOD 3 * 1000 * 1000 // Periodo para las mediciones
@@ -99,8 +129,12 @@ bool iluminacion_optima;
 TaskHandle_t medir_task_handle = NULL;			   // tarea que mide
 TaskHandle_t ventanas_task_handle = NULL;		   // tarea que abre y cierra las ventanas
 TaskHandle_t notificar_task_handle = NULL;		   // tarea que lee y envia datos de la uart
-TaskHandle_t verificar_horario_task_handle = NULL; // tarea que llama a la funcion finali
+TaskHandle_t verificar_horario_task_handle = NULL; // tarea que llama a la funcion final
 
+/**
+ *  @var actual
+ * @brief variable que almacena la hora actual una vez que se la configura por UART
+ */
 static rtc_t actual = {
 	.year = 2025,
 	.month = 06,
@@ -111,21 +145,25 @@ static rtc_t actual = {
 	.sec = 5,
 };
 
+/**
+ *  @var apagado
+ * @brief variable que almacena la hora a la que se debe apagar el sistema
+ */
 rtc_t apagado = {
 	.year = 2025,
 	.month = 06,
 	.mday = 23,
 	.wday = 1,
-	.hour = 17,
-	.min = 6,
+	.hour = 20,
+	.min = 00,
 	.sec = 5};
 
 /*==================[internal functions declaration]=========================*/
 
 /**
- *  @fn FuncTimer3seg(void *param)
+ * @fn FuncTimer3seg(void *param)
  * @brief Funcion del Timer A que llama a las tareas cada 3 segundos
- * @return
+ * @return nada
  */
 void FuncTimer3seg(void *param)
 {
@@ -136,57 +174,59 @@ void FuncTimer3seg(void *param)
 
 /**
  * @fn static void TareaMedir (void *pvParameter)
- * @brief Funcion que mide el valor de la resistencia que sensa la luz
- * @return
+ * @brief Funcion que mide el valor de la resistencia que sensa la luz y prende las luces de ser necesario
+ * @return nada
  */
 static void TareaMedir(void *pvParameter)
 {
-	while (finalizar == false)
+	while (true)
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-		AnalogInputReadSingle(CH2, &luz_interior);
-
-		UartSendString(UART_PC, "Luz en el interior: ");
-		UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
-		UartSendString(UART_PC, "\r\n");
-
-		AnalogInputReadSingle(CH3, &luz_exterior);
-		if (ventanas_abiertas == 1)
+		if (finalizar == false)
 		{
-			if (luz_interior < iluminacion_ideal)
+			AnalogInputReadSingle(CH2, &luz_interior);
+
+			UartSendString(UART_PC, "Luz en el interior: ");
+			UartSendString(UART_PC, (char *)UartItoa(luz_interior, 10));
+			UartSendString(UART_PC, "\r\n");
+
+			AnalogInputReadSingle(CH3, &luz_exterior);
+			if (ventanas_abiertas == 1)
 			{
-				if (luz_exterior > iluminacion_ideal)
+				if (luz_interior < iluminacion_ideal)
 				{
-					prender_luces = 1;
-					GPIOOn(GPIO_9);
+					if (luz_exterior > iluminacion_ideal)
+					{
+						prender_luces = 1;
+						GPIOOn(GPIO_9);
+					}
+					else
+					{
+						if (luz_exterior < iluminacion_ideal)
+						{
+							ventanas_abiertas = 0;
+						}
+					}
 				}
 				else
 				{
-					if (luz_exterior < iluminacion_ideal)
-					{
-						ventanas_abiertas = 0;
-					}
+					iluminacion_optima = 1;
 				}
 			}
 			else
 			{
-				iluminacion_optima = 1;
-			}
-		}
-		else
-		{
-			if (ventanas_abiertas == 0)
-			{
-				if (luz_exterior > iluminacion_ideal)
+				if (ventanas_abiertas == 0)
 				{
-					GPIOOff(GPIO_9);
-					ventanas_abiertas = 1;
-				}
-				if (luz_exterior < iluminacion_ideal)
-				{
-					prender_luces = 1;
-					GPIOOn(GPIO_9);
+					if (luz_exterior > iluminacion_ideal)
+					{
+						GPIOOff(GPIO_9);
+						ventanas_abiertas = 1;
+					}
+					if (luz_exterior < iluminacion_ideal)
+					{
+						prender_luces = 1;
+						GPIOOn(GPIO_9);
+					}
 				}
 			}
 		}
@@ -201,20 +241,22 @@ static void TareaMedir(void *pvParameter)
 
 static void TareaVentanas(void *pvParameter)
 {
-	while (finalizar == false)
+	while (true)
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-		switch (ventanas_abiertas)
+		if (finalizar == false)
 		{
-		case 0:
-			angulo_servo = 90;
-			ServoMove(SERVO_0, angulo_servo);
-			break;
-		case 1:
-			angulo_servo = -90;
-			ServoMove(SERVO_0, angulo_servo);
-			break;
+			switch (ventanas_abiertas)
+			{
+			case 0:
+				angulo_servo = 90;
+				ServoMove(SERVO_0, angulo_servo);
+				break;
+			case 1:
+				angulo_servo = -90;
+				ServoMove(SERVO_0, angulo_servo);
+				break;
+			}
 		}
 	}
 }
@@ -222,38 +264,40 @@ static void TareaVentanas(void *pvParameter)
 /**
  *  @fn TareaNotificarUART(void *pvParameter)
  * @brief Tarea que notifica por UART el estado del programa
- * @return
+ * @return nada
  */
 static void TareaNotificarUART(void *pvParameter)
-{ // UART
-	while (finalizar == false)//ponerle un if con esto y los while sean 1
+{
+	while (true)
 	{
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-		UartSendString(UART_PC, "Estatus a las: ");
-
-		RtcRead(&actual);
-		UartSendString(UART_PC, (char *)UartItoa(actual.hour, 10));
-		UartSendString(UART_PC, " : ");
-		UartSendString(UART_PC, (char *)UartItoa(actual.min, 10));
-		if (ventanas_abiertas == 1)
+		if (finalizar == false)
 		{
-			UartSendString(UART_PC, " hs. Las ventanas estan abiertas. \r\n");
+			UartSendString(UART_PC, "Estatus a las: ");
+
+			RtcRead(&actual);
+			UartSendString(UART_PC, (char *)UartItoa(actual.hour, 10));
+			UartSendString(UART_PC, " : ");
+			UartSendString(UART_PC, (char *)UartItoa(actual.min, 10));
+			if (ventanas_abiertas == 1)
+			{
+				UartSendString(UART_PC, " hs. Las ventanas estan abiertas. \r\n");
+			}
+			else
+				UartSendString(UART_PC, " hs. Las ventanas estan cerradas. \r\n");
+			if (prender_luces == 1)
+			{
+				UartSendString(UART_PC, "Las luces estan encendidas. \r\n");
+			}
+			else
+				UartSendString(UART_PC, "Las luces estan apagadas. \r\n");
 		}
-		else
-			UartSendString(UART_PC, " hs. Las ventanas estan cerradas. \r\n");
-		if (prender_luces == 1)
-		{
-			UartSendString(UART_PC, "Las luces estan encendidas. \r\n");
-		}
-		else
-			UartSendString(UART_PC, "Las luces estan apagadas. \r\n");
 	}
 }
 /**
  * @fn static void Modificarhorarios()
  * @brief Funcion de interrupcion de la UART  para modificar el horario actual del programa
- * @return
+ * @return nada
  */
 
 static void Modificarhorarios()
@@ -294,8 +338,7 @@ static void Modificarhorarios()
 /**
  * @fn static void final(void *pvParameter)
  * @brief Tarea que finaliza el programa cuando se cumple el horario
- * @param [in]
- * @return
+ * @return nada
  */
 
 static void final(void *pvParameter)
@@ -333,23 +376,23 @@ void app_main(void)
 		.timer = TIMER_A,
 		.period = CONFIG_TAREAS_PERIOD,
 		.func_p = FuncTimer3seg,
-		.param_p = NULL};
+		.param_p = NULL
+	};
 
-	//----------------------------------
 	analog_input_config_t canal_2 = {
-		.input = CH2,		// canal2
-		.mode = ADC_SINGLE, // single porque solo va por interrupciones
-		.func_p = NULL,		// solo para modo continuo
-		.param_p = NULL,	// solo para modo continuo
-		.sample_frec = 0	// no lo vamos a usar
+		.input = CH2,		
+		.mode = ADC_SINGLE, 
+		.func_p = NULL,		
+		.param_p = NULL,	
+		.sample_frec = 0	
 	};
 
 	analog_input_config_t canal_3 = {
-		.input = CH3,		// canal3
-		.mode = ADC_SINGLE, // single porque solo va por interrupciones
-		.func_p = NULL,		// solo para modo continuo
-		.param_p = NULL,	// solo para modo continuo
-		.sample_frec = 0	// no lo vamos a usar
+		.input = CH3,		
+		.mode = ADC_SINGLE, 
+		.func_p = NULL,		
+		.param_p = NULL,	
+		.sample_frec = 0
 	};
 
 	serial_config_t my_uart = {
@@ -372,12 +415,10 @@ void app_main(void)
 	xTaskCreate(&TareaMedir, "Medir iluminacion", 4096, NULL, 5, &medir_task_handle);
 	xTaskCreate(&TareaVentanas, "Abrir y cerrar", 1024, NULL, 5, &ventanas_task_handle);
 	xTaskCreate(&TareaNotificarUART, "Notificar por UART", 2048, NULL, 5, &notificar_task_handle);
-
-	//-------------------------------------------------------------------------------------------
 	xTaskCreate(&final, "Horario de cierre", 2048, NULL, 5, &verificar_horario_task_handle);
-	//-------------------------------------------------------------------------------------------
+
 
 	TimerStart(timer_tareas.timer);
-	//--------------------------------
+
 }
 /*==================[end of file]============================================*/
